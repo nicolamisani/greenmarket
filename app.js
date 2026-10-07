@@ -7,9 +7,9 @@ import { getAuth, signInAnonymously, onAuthStateChanged }
 import { getFirestore, doc, getDoc, collection, setDoc, updateDoc, onSnapshot, serverTimestamp }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-import { FIREBASE_CONFIG, INSTRUCTOR_PUBLIC_KEY } from './firebase-config.js?v=23';
-import { CASES, ICONS } from './cases.js?v=23';
-import { encryptPayload, cryptoAvailable, groupKeyB64, decryptWithGroupKey } from './crypto.js?v=23';
+import { FIREBASE_CONFIG, INSTRUCTOR_PUBLIC_KEY } from './firebase-config.js?v=24';
+import { CASES, ICONS } from './cases.js?v=24';
+import { encryptPayload, cryptoAvailable, groupKeyB64, decryptWithGroupKey } from './crypto.js?v=24';
 
 const app  = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -22,7 +22,7 @@ const LS = 'gm_session_v1';
 const state = {
   uid:null, code:null, groupId:null, label:'', members:[],
   phase:'lobby', endsAt:null, open:0, submitted:false, score:null,
-  reveal:null, feedback:null, board:null,
+  reveal:null, feedback:null, board:null, podiumStep:0,
   slots: CASES.map(() => ({ green:'', add:'', des:'', prob:50, done:false })),
 };
 const doneCount = () => state.slots.filter(s => s.done).length;
@@ -30,8 +30,8 @@ const $ = id => document.getElementById(id);
 const show = which => {
   ['intro','join','wait','home','market','sent','board','result'].forEach(id =>
     $(id).classList.toggle('hidden', id !== which));
-  // the intro carries its own big logo, so the bar would only repeat it
-  document.querySelector('.topbar').classList.toggle('hidden', which === 'intro');
+  // the intro carries its own big logo, so the bar stays but empties itself
+  document.querySelector('.topbar').classList.toggle('bare', which === 'intro');
 };
 const fail = msg => { $('err').textContent = msg; $('err').classList.remove('hidden'); };
 const clearErr = () => $('err').classList.add('hidden');
@@ -159,6 +159,7 @@ function watchSession() {
     const d = snap.data() || {};
     state.phase  = d.phase || 'lobby';
     state.endsAt = d.countdownEndsAt ? d.countdownEndsAt.toMillis() : null;
+    state.podiumStep = d.podiumStep ?? 0;
     applyPhase();
   }, e => fail('Lost the connection: ' + e.message));
 
@@ -363,16 +364,45 @@ const said = (lab, txt) => `<p class="said"><b>${lab}</b>` +
   (txt && txt.trim() ? `<span>“${esc(txt.trim())}”</span>`
                      : '<span class="small">You wrote nothing.</span>') + '</p>';
 
+// The instructor walks the podium: third, then second, then first, then everyone.
+const MEDAL = { 1:'🥇', 2:'🥈', 3:'🥉' };
+function plinth(row, place) {
+  if (!row) return '<div class="ghost-slot"></div>';
+  const me = row.label === state.label;
+  return `<div class="plinth p${place}${me?' me':''}">
+    <div class="medal">${MEDAL[place]}</div>
+    <div class="nm">${esc(row.label)}${me?'<br><span class="small">(you)</span>':''}</div>
+    <div class="pt">${row.score>0?'+':''}${row.score}</div>
+    <div class="block">${place}</div>
+  </div>`;
+}
+
 function renderBoard() {
   if (!state.board) return;
+  const step = state.podiumStep || 0;
+  const by = r => state.board.find(x => x.rank === r);
   const n = state.board.length;
-  $('boardSub').textContent = `${n} group${n===1?'':'s'} · ${CASES.length} markets · 990 points possible`;
-  $('boardList').innerHTML = state.board.map(r => `
-    <div class="rank ${r.rank<=3?'p'+r.rank:''} ${r.label===state.label?'me':''}">
-      <div class="pos">${r.rank===1?'🥇':r.rank===2?'🥈':r.rank===3?'🥉':r.rank}</div>
-      <div class="nm">${esc(r.label)}${r.label===state.label?' <span class="small">(you)</span>':''}</div>
-      <div class="pts">${r.score>0?'+':''}${r.score}</div>
-    </div>`).join('');
+
+  $('boardTitle').textContent = step === 0 ? 'The results are in'
+    : step < 4 ? 'The podium' : 'The leaderboard';
+  $('boardSub').textContent = step === 0
+    ? 'Wait. Your instructor shows the places one by one.'
+    : `${n} group${n===1?'':'s'} · ${CASES.length} markets · 990 points possible`;
+
+  // second on the left, first in the middle, third on the right — revealed 3, 2, 1
+  $('podium').innerHTML = step === 0 ? '' : [
+      step >= 2 ? plinth(by(2), 2) : '<div class="ghost-slot"></div>',
+      step >= 3 ? plinth(by(1), 1) : '<div class="ghost-slot"></div>',
+      step >= 1 ? plinth(by(3), 3) : '<div class="ghost-slot"></div>',
+    ].join('');
+
+  $('boardList').innerHTML = step < 4 ? '' :
+    '<div style="margin-top:18px">' + state.board.map(r => `
+      <div class="rank ${r.rank<=3?'p'+r.rank:''} ${r.label===state.label?'me':''}">
+        <div class="pos">${MEDAL[r.rank] || r.rank}</div>
+        <div class="nm">${esc(r.label)}${r.label===state.label?' <span class="small">(you)</span>':''}</div>
+        <div class="pts">${r.score>0?'+':''}${r.score}</div>
+      </div>`).join('') + '</div>';
 }
 
 function renderReveal() {

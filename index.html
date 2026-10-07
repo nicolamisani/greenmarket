@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Greenmarket</title>
-<link rel="stylesheet" href="style.css?v=23">
+<link rel="stylesheet" href="style.css?v=24">
 <style>
   /* ---- screens the networked client adds on top of the shared stylesheet ---- */
   .wrap{max-width:520px;margin:0 auto}
@@ -25,6 +25,26 @@
   .clock.calm{background:var(--yes-bg);border-color:var(--yes-line)} .clock.calm b{color:var(--yes)}
   .err{background:var(--no-bg);border:1px solid var(--no-line);border-radius:7px;padding:10px 13px;
     font-size:13px;color:#f0a98a;margin-bottom:12px}
+  /* an empty bar on the intro: same height, same rule, nothing in it */
+  .topbar.bare .topin > *{visibility:hidden}
+  /* ---- podium ---- */
+  .podium{display:flex;align-items:flex-end;justify-content:center;gap:10px;
+    min-height:230px;margin:22px 0 4px}
+  .plinth{flex:1;max-width:150px;display:flex;flex-direction:column;align-items:center;
+    animation:rise .55s cubic-bezier(.2,.9,.3,1.2) both}
+  @keyframes rise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+  .plinth .medal{font-size:30px;line-height:1;margin-bottom:5px}
+  .plinth .nm{font-size:14.5px;font-weight:700;text-align:center;line-height:1.25;
+    margin-bottom:3px;overflow-wrap:anywhere}
+  .plinth .pt{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;margin-bottom:7px}
+  .plinth .block{width:100%;border-radius:9px 9px 0 0;display:flex;align-items:flex-start;
+    justify-content:center;padding-top:9px;font-size:26px;font-weight:700;color:rgba(255,255,255,.55)}
+  .plinth.p1 .block{height:118px;background:linear-gradient(180deg,#f6c344,#b78a1d)}
+  .plinth.p2 .block{height:86px;background:linear-gradient(180deg,#cfd8e0,#8a97a3)}
+  .plinth.p3 .block{height:62px;background:linear-gradient(180deg,#cd9163,#8d5f3c)}
+  .plinth.me .nm{color:var(--yes)}
+  .podium .ghost-slot{flex:1;max-width:150px}
+  @media(max-width:520px){ .podium{gap:6px;min-height:200px} .plinth .nm{font-size:13px} }
   .rank{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:9px;
     background:var(--panel-2);border:1px solid var(--rule);margin-bottom:7px}
   .rank .pos{font-size:17px;font-weight:700;width:30px;text-align:center;color:var(--muted)}
@@ -272,8 +292,9 @@
   <!-- ===================== LEADERBOARD ===================== -->
   <div id="board" class="hidden wrap">
     <div class="panel">
-      <h2 style="margin-bottom:4px">The leaderboard</h2>
-      <p class="small" style="margin-top:0" id="boardSub"></p>
+      <h2 style="margin-bottom:4px" id="boardTitle">The results are in</h2>
+      <p style="margin-top:0" id="boardSub"></p>
+      <div class="podium" id="podium"></div>
       <div id="boardList"></div>
     </div>
   </div>
@@ -304,6 +325,6 @@
   </div>
 </div>
 
-<script type="module" src="app.js?v=23"></script>
+<script type="module" src="app.js?v=24"></script>
 </body>
 </html>
