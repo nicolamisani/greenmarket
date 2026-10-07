@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Greenmarket</title>
-<link rel="stylesheet" href="style.css?v=12">
+<link rel="stylesheet" href="style.css?v=13">
 <style>
   /* ---- screens the networked client adds on top of the shared stylesheet ---- */
   .wrap{max-width:520px;margin:0 auto}
@@ -50,6 +50,11 @@
   .gitem{background:var(--panel-2);border:1px solid var(--rule);border-radius:6px;padding:8px 10px;margin-bottom:5px}
   .gitem b{font-size:13.5px} .gitem div{font-size:12.5px;color:var(--muted);margin-top:1px}
   #intro,#join{max-width:760px;margin:0 auto}
+  /* every paragraph on the first page reads at body size, like The market box */
+  #intro .gitem div{font-size:14px;color:#b9c7d4;margin-top:2px}
+  #intro .gitem b{font-size:14.5px}
+  #intro table td{font-size:14px;padding:8px}
+  @media(max-width:820px){ #intro .gitem div,#intro table td{font-size:15px} }
   .hero{text-align:center;padding:46px 20px 40px;margin-bottom:14px;border-radius:14px;
     background:radial-gradient(120% 140% at 50% 0%, rgba(39,174,96,.20) 0%, rgba(39,174,96,0) 62%),
                var(--panel);border:1px solid var(--rule)}
@@ -144,7 +149,7 @@
 
     <div class="panel">
       <h2>The product attributes</h2>
-      <p class="small" style="margin-top:0">
+      <p style="margin-top:0">
         <b>Core value</b> is in the product itself: what it does, or what is in it.
         <b>Peripheral value</b> is its size, pack, or look.</p>
       <div class="gloss">
@@ -168,9 +173,9 @@
 
     <div class="panel">
       <h2>Points</h2>
-      <p class="small" style="margin-top:0">You get points for the probability only. This is the formula:</p>
+      <p style="margin-top:0">You get points for the probability only. This is the formula:</p>
       <div class="formula">points = 100 &minus; 400 &times; (p &minus; r)<sup>2</sup></div>
-      <p class="small"><b>p</b> is your probability, from 0 to 1.
+      <p><b>p</b> is your probability, from 0 to 1.
         <b>r</b> is the result. r is 1 if the product is on sale. r is 0 if it is not on sale.
         This is the Brier score. It is a proper scoring rule: your best answer is the probability that you believe.</p>
       <table>
@@ -178,14 +183,14 @@
         <tr><td>You say 90 percent, and the product is on sale</td><td>+96 points</td></tr>
         <tr><td>You say 90 percent, and the product is not on sale</td><td>&minus;224 points</td></tr>
       </table>
-      <p class="small">A safe answer of 50 percent gives you no points. If you are sure and correct, you get
+      <p>A safe answer of 50 percent gives you no points. If you are sure and correct, you get
         many points. If you are sure and wrong, you lose more. Give the probability that you believe.
         The computer does not give points for your three answers. You compare them with the market at the end.</p>
     </div>
 
     <div class="panel" style="text-align:center">
       <button class="big" id="toJoin" style="max-width:320px">We are in</button>
-      <p class="small" style="margin:10px 0 0">Your instructor gives you a code of four digits.</p>
+      <p style="margin:10px 0 0">Your instructor gives you a code of four digits.</p>
     </div>
   </div>
 
@@ -303,6 +308,6 @@
   </div>
 </div>
 
-<script type="module" src="app.js?v=12"></script>
+<script type="module" src="app.js?v=13"></script>
 </body>
 </html>
