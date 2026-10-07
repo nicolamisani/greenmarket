@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Greenmarket</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  /* ---- screens the networked client adds on top of the shared stylesheet ---- */
+  .wrap{max-width:520px;margin:0 auto}
+  .field{margin-bottom:12px}
+  .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+  .field input{width:100%}
+  .members input{margin-bottom:6px}
+  .big{font-size:16px;padding:13px 24px;width:100%}
+  .wait{text-align:center;padding:40px 0}
+  .wait .dotrow{display:flex;gap:7px;justify-content:center;margin-top:14px}
+  .wait .dotrow i{width:8px;height:8px;border-radius:50%;background:var(--panel-3);
+    animation:pulse 1.3s infinite}
+  .wait .dotrow i:nth-child(2){animation-delay:.2s} .wait .dotrow i:nth-child(3){animation-delay:.4s}
+  @keyframes pulse{0%,100%{background:var(--panel-3)}50%{background:var(--yes)}}
+  .clock{position:sticky;top:52px;z-index:18;background:var(--no-bg);border:1px solid var(--no-line);
+    border-radius:9px;padding:9px 14px;margin-bottom:12px;display:flex;align-items:center;gap:12px}
+  .clock b{font-size:22px;font-variant-numeric:tabular-nums;letter-spacing:-.5px;color:var(--no)}
+  .clock.calm{background:var(--yes-bg);border-color:var(--yes-line)} .clock.calm b{color:var(--yes)}
+  .err{background:var(--no-bg);border:1px solid var(--no-line);border-radius:7px;padding:10px 13px;
+    font-size:13px;color:#f0a98a;margin-bottom:12px}
+  .rank{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:9px;
+    background:var(--panel-2);border:1px solid var(--rule);margin-bottom:7px}
+  .rank .pos{font-size:17px;font-weight:700;width:30px;text-align:center;color:var(--muted)}
+  .rank .nm{font-weight:600;flex:1;min-width:0;overflow-wrap:anywhere}
+  .rank .pts{font-variant-numeric:tabular-nums;font-weight:700}
+  .rank.me{border-color:var(--yes);background:var(--yes-bg)}
+  .rank.p1 .pos{color:#f6c344;font-size:21px}
+  .rank.p2 .pos{color:#cfd8e0;font-size:19px}
+  .rank.p3 .pos{color:#cd9163;font-size:19px}
+  .thanks{text-align:center;padding:26px 20px}
+  .thanks h2{margin-bottom:6px}
+  .overall{background:rgba(45,156,219,.1);border-left:3px solid var(--blue);
+    border-radius:0 8px 8px 0;padding:11px 14px;margin:0 0 12px;font-size:14px}
+  .aibox{border-top:1px solid var(--rule);margin-top:10px;padding-top:9px;font-size:13px}
+  .aibox span{display:block;margin-top:4px}
+  .aibox .good{color:#6fd49b} .aibox .bad{color:#f0a98a}
+  @media(max-width:640px){
+    .grid{grid-template-columns:1fr}
+    .card-top{flex-wrap:wrap;gap:12px}
+    .icon{width:96px;height:96px;flex:0 0 96px}
+    .page{padding:0 14px 30px} .topin{padding:10px 14px}
+    .tag{display:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="topin">
+  <div class="logo">
+    <svg viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M5.4 3.5v25" stroke="currentColor" stroke-width="3.1" stroke-linecap="round"/>
+      <path d="M9.6 5.2 27.4 10.2 9.6 15.6Z" fill="currentColor"/>
+      <path d="M9.6 18.4 22.2 21.9 9.6 26.4Z" fill="currentColor" opacity=".62"/>
+    </svg>
+    <h1>Greenmarket</h1>
+  </div>
+  <span class="tag">The Greenest Largest Prediction Market</span>
+  <div class="topright">
+    <span class="counter" id="counter"></span>
+    <span class="small" id="who"></span>
+  </div>
+</div></div>
+
+<div class="page">
+  <div id="err" class="err hidden"></div>
+
+  <!-- ===================== JOIN ===================== -->
+  <div id="join" class="hidden wrap">
+    <div class="panel">
+      <h2>Join the market</h2>
+      <p class="small" style="margin-top:0">Write the name of your group. Then write the full name of
+        each person in the group. Your instructor sees this list.</p>
+      <div class="field"><label>Session code</label><input type="text" id="code" placeholder="e.g. 30296A" autocapitalize="characters"></div>
+      <div class="field"><label>Group name</label><input type="text" id="gname" placeholder="e.g. Group 7"></div>
+      <div class="field"><label>People in the group</label><div class="members" id="members"></div>
+        <button class="ghost" id="addMember" style="font-size:12px;padding:6px 12px">Add a person</button></div>
+      <button class="big" id="doJoin" style="margin-top:10px">Join</button>
+      <p class="small" id="privacy" style="margin-top:12px">
+        The names are encrypted in this browser. Only your instructor can read them.</p>
+    </div>
+  </div>
+
+  <!-- ===================== WAIT ===================== -->
+  <div id="wait" class="hidden wrap">
+    <div class="panel wait">
+      <h2 id="waitTitle">You are in</h2>
+      <p class="small" id="waitText">Wait. Your instructor starts the game. Keep this page open.</p>
+      <div class="dotrow"><i></i><i></i><i></i></div>
+      <p class="small" style="margin-top:18px" id="waitWho"></p>
+    </div>
+  </div>
+
+  <!-- ===================== THE MARKETS ===================== -->
+  <div id="home" class="hidden">
+    <div id="clockHome"></div>
+    <div class="grid" id="grid"></div>
+    <div class="subbar">
+      <div class="txt" id="subTxt"></div>
+      <div class="bar"><i id="subBar"></i></div>
+      <button id="submitAll">Send all 10 predictions</button>
+    </div>
+  </div>
+
+  <!-- ===================== ONE MARKET ===================== -->
+  <div id="market" class="hidden">
+    <button class="back" id="back">← All markets</button>
+    <div id="clockMarket"></div>
+    <div class="card">
+      <div class="card-top">
+        <div class="icon" id="cIcon"></div>
+        <div><div class="c" id="cCat"></div><div class="t" id="cTitle"></div></div>
+        <div class="small" style="margin-left:auto" id="cNum"></div>
+      </div>
+      <dl class="rows" id="cRows"></dl>
+    </div>
+    <div class="panel">
+      <div class="ask">
+        <div class="q">1. What is the sustainability benefit?</div>
+        <div class="h">Write what the company shows to the buyer.</div>
+        <textarea id="aGreen"></textarea>
+      </div>
+      <div class="ask">
+        <div class="q" style="color:var(--add)">2. What is the value added?</div>
+        <div class="h">Write what the user gets.</div>
+        <textarea id="aAdd"></textarea>
+      </div>
+      <div class="ask" style="margin-bottom:0">
+        <div class="q" style="color:var(--dest)">3. What is the value destroyed?</div>
+        <div class="h">Write what the user loses. A high price is always value destroyed.</div>
+        <textarea id="aDest"></textarea>
+      </div>
+    </div>
+    <div class="floater">
+      <div class="lab">Is this product still on sale today?</div>
+      <div class="yesno"><div class="y">Yes <b id="pYes">50%</b></div><div class="n">No <b id="pNo">50%</b></div></div>
+      <div class="frow">
+        <input type="range" id="prob" min="5" max="95" step="5" value="50">
+        <div class="probval" id="probVal">50%</div>
+        <button id="lock">Save</button>
+      </div>
+      <div class="ticks"><span>certainly no</span><span>I do not know</span><span>certainly yes</span></div>
+    </div>
+  </div>
+
+  <!-- ===================== LEADERBOARD ===================== -->
+  <div id="board" class="hidden wrap">
+    <div class="panel">
+      <h2 style="margin-bottom:4px">The leaderboard</h2>
+      <p class="small" style="margin-top:0" id="boardSub"></p>
+      <div id="boardList"></div>
+    </div>
+  </div>
+
+  <!-- ===================== RESULT ===================== -->
+  <div id="result" class="hidden">
+    <div class="panel" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <h2 id="revTitle" style="margin:0"></h2>
+      <button id="download" style="margin-left:auto">Download your results</button>
+    </div>
+    <div id="revOverall"></div>
+    <div id="revList"></div>
+    <div class="panel thanks">
+      <h2>Thank you for playing</h2>
+      <p class="small">Keep your results. The file has your answers, the real products and the comments.</p>
+      <button id="download2">Download your results</button>
+    </div>
+  </div>
+
+  <!-- ===================== SENT ===================== -->
+  <div id="sent" class="hidden wrap">
+    <div class="panel wait">
+      <h2>Your predictions are sent</h2>
+      <p class="small" id="sentText">Wait. Your instructor shows the results.</p>
+      <div class="dotrow"><i></i><i></i><i></i></div>
+      <table id="sentTbl" style="margin-top:20px;text-align:left"></table>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
