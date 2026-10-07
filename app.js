@@ -284,6 +284,26 @@ function openMarket(i) {
   window.scrollTo({ top:0 });
 }
 
+// Typing is kept in state immediately and pushed to Firestore a second later, so a
+// market that closes mid-sentence still has the words. The Save button stays, because
+// it is what marks a market as answered.
+let autoTimer = null, autoPending = false;
+function noteTyping() {
+  const s = state.slots[state.open];
+  s.green = $('aGreen').value; s.add = $('aAdd').value; s.des = $('aDest').value;
+  if (state.submitted) return;
+  autoPending = true;
+  $('saveState').textContent = 'typing…';
+  clearTimeout(autoTimer);
+  autoTimer = setTimeout(async () => {
+    if (!autoPending) return;
+    autoPending = false;
+    try { await pushProgress(); $('saveState').textContent = 'saved'; }
+    catch (e) { $('saveState').textContent = 'not saved'; }
+    setTimeout(() => { if (!autoPending) $('saveState').textContent = ''; }, 2500);
+  }, 1000);
+}
+
 async function saveMarket() {
   const s = state.slots[state.open];
   s.green = $('aGreen').value; s.add = $('aAdd').value; s.des = $('aDest').value;
@@ -296,7 +316,9 @@ async function saveMarket() {
  *  The written answers travel inside the encrypted blob. */
 async function pushProgress() {
   const predictions = {};
-  state.slots.forEach((s,i) => { if (s.done) predictions[CASES[i].id] = s.prob; });
+  state.slots.forEach((s,i) => {
+    if (s.done || s.green.trim() || s.add.trim() || s.des.trim()) predictions[CASES[i].id] = s.prob;
+  });
   try {
     const enc = await encryptPayload({
       label: state.label, members: state.members, groupKey: await groupKeyB64(),
@@ -423,7 +445,14 @@ function downloadMd() {
 // -----------------------------------------------------------------------------
 $('download').onclick = downloadMd;
 $('download2').onclick = downloadMd;
-$('back').onclick = renderHome;
+function flush() { clearTimeout(autoTimer); if (autoPending) { autoPending = false; pushProgress(); } }
+document.addEventListener('visibilitychange', () => { if (document.hidden) flush(); });
+window.addEventListener('pagehide', flush);
+$('back').onclick = () => { flush(); renderHome(); };
+['aGreen','aAdd','aDest'].forEach(id => {
+  $(id).addEventListener('input', noteTyping);
+  $(id).addEventListener('blur', flush);
+});
 $('lock').onclick = saveMarket;
 $('submitAll').onclick = () => submitAll(false);
 $('prob').oninput = e => { state.slots[state.open].prob = +e.target.value; paintProb(); };
