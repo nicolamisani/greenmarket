@@ -41,6 +41,22 @@
   .aibox{border-top:1px solid var(--rule);margin-top:10px;padding-top:9px;font-size:13px}
   .aibox span{display:block;margin-top:4px}
   .aibox .good{color:#6fd49b} .aibox .bad{color:#f0a98a}
+  /* iOS zooms in on any field under 16px and never zooms back out. This is why
+     the page looked oversized after tapping an answer box. */
+  @media(max-width:820px){
+    input[type=text],input[type=password],textarea{font-size:16px}
+    body{font-size:15px}
+    .rows{grid-template-columns:86px 1fr}
+    .rows dt{padding-left:14px;font-size:10px} .rows dd{padding-right:14px;font-size:14.5px}
+    .card-top{padding:14px}
+    .probval{font-size:26px;min-width:76px}
+    .floater{padding:11px 13px}
+    .subbar{padding:11px 13px;gap:10px} .subbar button{padding:11px 18px}
+    .topin{gap:10px}
+    h1{font-size:18px} h2{font-size:16px}
+    .shot{width:76px;height:76px;flex:0 0 76px}
+    .revres{padding:6px 11px} .revres .big{font-size:12px}
+  }
   @media(max-width:640px){
     .grid{grid-template-columns:1fr}
     .card-top{flex-wrap:wrap;gap:12px}
@@ -77,7 +93,7 @@
       <h2>Join the market</h2>
       <p class="small" style="margin-top:0">Write the name of your group. Then write the full name of
         each person in the group. Your instructor sees this list.</p>
-      <div class="field"><label>Session code</label><input type="text" id="code" placeholder="e.g. 30296A" autocapitalize="characters"></div>
+      <div class="field"><label>Market code</label><input type="text" id="code" placeholder="4 digits" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" style="font-size:22px;letter-spacing:5px;text-align:center"></div>
       <div class="field"><label>Group name</label><input type="text" id="gname" placeholder="e.g. Group 7"></div>
       <div class="field"><label>People in the group</label><div class="members" id="members"></div>
         <button class="ghost" id="addMember" style="font-size:12px;padding:6px 12px">Add a person</button></div>

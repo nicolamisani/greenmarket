@@ -43,14 +43,50 @@ function memberRow(v = '') {
 [0,1,2].forEach(() => memberRow());
 $('addMember').onclick = () => memberRow();
 
+const JOINABLE = ['lobby','playing','countdown'];
+
+/** Is this market open? Returns 'open', 'closed', 'none' or 'offline'. */
+async function sessionState(code) {
+  try {
+    const snap = await getDoc(doc(db, 'sessions', code));
+    if (!snap.exists()) return 'none';
+    return JOINABLE.includes(snap.data().phase) ? 'open' : 'closed';
+  } catch (e) { return 'offline'; }
+}
+
+let waitTimer = null;
+function waitForMarket(code, label, members) {
+  show('wait');
+  $('waitTitle').textContent = 'The market is not open';
+  $('waitText').textContent  = `Wait. Your instructor opens market ${code} soon. This page tries again by itself.`;
+  $('waitWho').textContent   = '';
+  if (waitTimer) clearInterval(waitTimer);
+  waitTimer = setInterval(async () => {
+    if (await sessionState(code) === 'open') {
+      clearInterval(waitTimer); waitTimer = null;
+      $('waitTitle').textContent = 'You are in';
+      doJoin(code, label, members);
+    }
+  }, 4000);
+}
+
 $('doJoin').onclick = async () => {
-  const code  = $('code').value.trim().toUpperCase();
+  const code  = $('code').value.replace(/\D/g,'');
   const label = $('gname').value.trim();
   const members = [...$('members').querySelectorAll('input')]
     .map(i => i.value.trim()).filter(Boolean);
-  if (!code || !label || !members.length) return fail('Write the code, the group name and one name.');
+  if (code.length !== 4) return fail('The market code is four digits.');
+  if (!label || !members.length) return fail('Write the group name and one name.');
   if (!cryptoAvailable()) return fail('This page needs https. Nothing was sent.');
 
+  const st = await sessionState(code);
+  if (st === 'none')    return waitForMarket(code, label, members);
+  if (st === 'closed')  return fail('This market is closed. You cannot join now.');
+  if (st === 'offline') return fail('No connection. Try again.');
+  doJoin(code, label, members);
+};
+
+async function doJoin(code, label, members) {
   try {
     clearErr();
     state.code = code; state.label = label; state.members = members;
@@ -65,10 +101,16 @@ $('doJoin').onclick = async () => {
     localStorage.setItem(LS, JSON.stringify({ code, label, members }));
     watchSession();
     show('wait');
+    $('waitTitle').textContent = 'You are in';
+    $('waitText').textContent = 'Wait. Your instructor starts the game. Keep this page open.';
     $('waitWho').textContent = `${label} — ${members.length} people`;
     $('who').textContent = label;
-  } catch (e) { fail('Could not join: ' + e.message); }
-};
+  } catch (e) {
+    fail(e.code === 'permission-denied'
+      ? 'The market is not open for new groups. Ask your instructor.'
+      : 'Could not join: ' + e.message);
+  }
+}
 
 const sessionRef = () => doc(db, 'sessions', state.code);
 const groupRef   = () => doc(collection(db, 'sessions', state.code, 'groups'), state.groupId);
@@ -261,7 +303,11 @@ async function pushProgress() {
       answers: state.slots.map((s,i) => ({ id:CASES[i].id, green:s.green, add:s.add, des:s.des })),
     }, INSTRUCTOR_PUBLIC_KEY);
     await updateDoc(groupRef(), { predictions, done: doneCount(), enc, updatedAt: serverTimestamp() });
-  } catch (e) { fail('Could not save: ' + e.message); }
+  } catch (e) {
+    fail(e.code === 'permission-denied'
+      ? 'The market is closed. Your last answer was not saved.'
+      : 'Could not save: ' + e.message);
+  }
 }
 
 async function submitAll(auto = false) {
