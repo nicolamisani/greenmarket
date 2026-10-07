@@ -27,7 +27,7 @@ const state = {
 };
 const doneCount = () => state.slots.filter(s => s.done).length;
 const $ = id => document.getElementById(id);
-const show = which => ['join','wait','home','market','sent','board','result'].forEach(id =>
+const show = which => ['intro','join','wait','home','market','sent','board','result'].forEach(id =>
   $(id).classList.toggle('hidden', id !== which));
 const fail = msg => { $('err').textContent = msg; $('err').classList.remove('hidden'); };
 const clearErr = () => $('err').classList.add('hidden');
@@ -445,6 +445,9 @@ function downloadMd() {
 // -----------------------------------------------------------------------------
 $('download').onclick = downloadMd;
 $('download2').onclick = downloadMd;
+$('toJoin').onclick = () => show('join');
+$('backIntro').onclick = () => show('intro');
+
 function flush() { clearTimeout(autoTimer); if (autoPending) { autoPending = false; pushProgress(); } }
 document.addEventListener('visibilitychange', () => { if (document.hidden) flush(); });
 window.addEventListener('pagehide', flush);
@@ -470,7 +473,7 @@ onAuthStateChanged(auth, user => {
     $('waitWho').textContent = `${saved.label} — ${saved.members.length} people`;
     watchSession(); show('wait');
   } else {
-    show('join');
+    show('intro');
   }
 });
 signInAnonymously(auth).catch(e => fail('Could not sign in: ' + e.message));

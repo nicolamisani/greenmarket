@@ -36,6 +36,33 @@
   .rank.p3 .pos{color:#cd9163;font-size:19px}
   .thanks{text-align:center;padding:26px 20px}
   .thanks h2{margin-bottom:6px}
+  .formula{background:var(--panel-2);border:1px solid var(--rule-strong);border-radius:8px;
+    padding:13px 15px;margin:4px 0 10px;text-align:center;font-size:16px;letter-spacing:0;
+    font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace}
+  .formula sup{font-size:11px}
+  .gloss{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:820px){.gloss{grid-template-columns:1fr}}
+  .gbox{border-radius:9px;padding:13px 14px}
+  .gbox.add{background:var(--add-bg);border:1px solid var(--add-line)}
+  .gbox.dest{background:var(--dest-bg);border:1px solid var(--dest-line)}
+  .gbox.add h3{color:var(--add)} .gbox.dest h3{color:var(--dest)}
+  .gitem{background:var(--panel-2);border:1px solid var(--rule);border-radius:6px;padding:8px 10px;margin-bottom:5px}
+  .gitem b{font-size:13.5px} .gitem div{font-size:12.5px;color:var(--muted);margin-top:1px}
+  #intro,#join{max-width:760px;margin:0 auto}
+  .hero{text-align:center;padding:46px 20px 40px;margin-bottom:14px;border-radius:14px;
+    background:radial-gradient(120% 140% at 50% 0%, rgba(39,174,96,.20) 0%, rgba(39,174,96,0) 62%),
+               var(--panel);border:1px solid var(--rule)}
+  .heromark{width:78px;height:78px;color:var(--yes);display:block;margin:0 auto 14px}
+  .heroword{font-size:48px;font-weight:700;letter-spacing:-1.8px;line-height:1}
+  .herotag{font-size:15px;color:var(--muted);margin-top:9px}
+  .herocourse{font-size:13px;color:var(--soft);margin-top:18px;padding-top:15px;
+    border-top:1px solid var(--rule);display:inline-block;padding-left:26px;padding-right:26px}
+  @media(max-width:820px){
+    .hero{padding:34px 16px 30px}
+    .heromark{width:60px;height:60px;margin-bottom:11px}
+    .heroword{font-size:36px;letter-spacing:-1.3px}
+    .herotag{font-size:13.5px}
+  }
   .overall{background:rgba(45,156,219,.1);border-left:3px solid var(--blue);
     border-radius:0 8px 8px 0;padding:11px 14px;margin:0 0 12px;font-size:14px}
   .aibox{border-top:1px solid var(--rule);margin-top:10px;padding-top:9px;font-size:13px}
@@ -87,6 +114,79 @@
 <div class="page">
   <div id="err" class="err hidden"></div>
 
+  <!-- ===================== INTRO ===================== -->
+  <div id="intro" class="hidden">
+    <div class="hero">
+      <svg class="heromark" viewBox="0 0 32 32" aria-hidden="true">
+        <path d="M5.4 3.5v25" stroke="currentColor" stroke-width="3.1" stroke-linecap="round"/>
+        <path d="M9.6 5.2 27.4 10.2 9.6 15.6Z" fill="currentColor"/>
+        <path d="M9.6 18.4 22.2 21.9 9.6 26.4Z" fill="currentColor" opacity=".62"/>
+      </svg>
+      <div class="heroword">Greenmarket</div>
+      <div class="herotag">The Greenest Largest Prediction Market</div>
+      <div class="herocourse">30296 Global Sustainability Strategy</div>
+    </div>
+    <div class="panel">
+      <h2>The market</h2>
+      <p>There are 10 markets. Each market is a green product. For each product you write three answers:</p>
+      <ul>
+        <li>the sustainability benefit that the company shows;</li>
+        <li>the <b style="color:var(--add)">value added</b> — what the user gets;</li>
+        <li>the <b style="color:var(--dest)">value destroyed</b> — what the user loses.</li>
+      </ul>
+      <p>Then you buy Yes or No: you give the probability that the product is still on sale today.
+         You can change an answer until you send all 10. Then you see all 10 results together.</p>
+      <p class="small">All 10 products came on sale between 2020 and 2026. Five products are still on sale.
+         The names are hidden. You cannot find the answer on the internet.</p>
+    </div>
+
+    <div class="panel">
+      <h2>The words that you need</h2>
+      <p class="small" style="margin-top:0">
+        <b>Core value</b> is in the product itself: what it does, or what is in it.
+        <b>Peripheral value</b> is around the product: its size, its pack, its look.</p>
+      <div class="gloss">
+        <div class="gbox add">
+          <h3>Value added — what the user gets</h3>
+          <div class="gitem"><b>Core — performance</b><div>The product does the job better than the usual product.</div></div>
+          <div class="gitem"><b>Core — composition</b><div>The product has different contents, for example fewer ingredients.</div></div>
+          <div class="gitem"><b>Peripheral — compactness</b><div>The product is smaller and lighter. It is easy to carry and to keep.</div></div>
+          <div class="gitem"><b>Peripheral — design</b><div>The object looks better, feels better, or is stronger.</div></div>
+          <div class="gitem"><b>Price savings</b><div>The product costs the user less money than the usual product.</div></div>
+        </div>
+        <div class="gbox dest">
+          <h3>Value destroyed — what the user loses</h3>
+          <div class="gitem"><b>Change to the routine</b><div>The user must do new tasks. The change is large, small, or none.</div></div>
+          <div class="gitem"><b>Performance uncertainty</b><div>The product can fail. The user is not sure that it works each time.</div></div>
+          <div class="gitem"><b>Restricted choice</b><div>The company gives fewer types, fewer smells, or fewer sizes.</div></div>
+          <div class="gitem"><b>Price premium</b><div>The product costs the user more money. A high price is always value destroyed.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Points</h2>
+      <p class="small" style="margin-top:0">You get points for the probability only. This is the formula:</p>
+      <div class="formula">points = 100 &minus; 400 &times; (p &minus; r)<sup>2</sup></div>
+      <p class="small"><b>p</b> is your probability, from 0 to 1.
+        <b>r</b> is the result. r is 1 if the product is on sale. r is 0 if it is not on sale.
+        This is the Brier score. It is a proper scoring rule: your best answer is the probability that you believe.</p>
+      <table>
+        <tr><td>You say 50 percent</td><td>0 points</td></tr>
+        <tr><td>You say 90 percent, and the product is on sale</td><td>+96 points</td></tr>
+        <tr><td>You say 90 percent, and the product is not on sale</td><td>&minus;224 points</td></tr>
+      </table>
+      <p class="small">A safe answer of 50 percent gives you no points. If you are sure and correct, you get
+        many points. If you are sure and wrong, you lose more. Give the probability that you believe.
+        The computer does not give points for your three answers. You compare them with the market at the end.</p>
+    </div>
+
+    <div class="panel" style="text-align:center">
+      <button class="big" id="toJoin" style="max-width:320px">We are in</button>
+      <p class="small" style="margin:10px 0 0">Your instructor gives you a code of four digits.</p>
+    </div>
+  </div>
+
   <!-- ===================== JOIN ===================== -->
   <div id="join" class="hidden wrap">
     <div class="panel">
@@ -98,6 +198,7 @@
       <div class="field"><label>People in the group</label><div class="members" id="members"></div>
         <button class="ghost" id="addMember" style="font-size:12px;padding:6px 12px">Add a person</button></div>
       <button class="big" id="doJoin" style="margin-top:10px">Join</button>
+      <button class="ghost" id="backIntro" style="width:100%;margin-top:8px">Read the rules again</button>
       <p class="small" id="privacy" style="margin-top:12px">
         The names are encrypted in this browser. Only your instructor can read them.</p>
     </div>
