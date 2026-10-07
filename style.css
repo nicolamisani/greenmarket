@@ -20,7 +20,7 @@
   .page{max-width:1240px;margin:0 auto;padding:0 22px 40px}
   .logo{display:flex;align-items:center;gap:9px}
   .logo svg{width:31px;height:31px;display:block;color:var(--yes)}
-  h1{font-size:21px;margin:0;font-weight:700;letter-spacing:-.7px}
+  h1{font-size:21px;margin:0;font-weight:600;letter-spacing:-.2px}
   h2{font-size:17px;margin:0 0 10px;font-weight:600;letter-spacing:-.2px}
   h3{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 9px;font-weight:600}
   p{margin:7px 0}
