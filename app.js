@@ -463,18 +463,26 @@ $('prob').oninput = e => { state.slots[state.open].prob = +e.target.value; paint
 // -----------------------------------------------------------------------------
 // boot
 // -----------------------------------------------------------------------------
-onAuthStateChanged(auth, user => {
+onAuthStateChanged(auth, async user => {
   if (!user) return;
   state.uid = user.uid; state.groupId = user.uid;
   const saved = JSON.parse(localStorage.getItem(LS) || 'null');
-  if (saved) {                                  // came back after a reload
-    state.code = saved.code; state.label = saved.label; state.members = saved.members;
-    $('who').textContent = saved.label;
-    $('waitWho').textContent = `${saved.label} — ${saved.members.length} people`;
-    watchSession(); show('wait');
-  } else {
-    show('intro');
+  if (!saved) return show('intro');
+
+  // Only rejoin the saved market if it is still there and we are still in it.
+  // Otherwise this is a new game: forget it and start from the rules.
+  state.code = saved.code; state.label = saved.label; state.members = saved.members;
+  let ours = false;
+  try { ours = (await getDoc(groupRef())).exists(); } catch (e) { ours = false; }
+  const st = await sessionState(saved.code);
+  if (!ours || st === 'offline') {
+    localStorage.removeItem(LS);
+    state.code = null; state.label = ''; state.members = [];
+    return show('intro');
   }
+  $('who').textContent = saved.label;
+  $('waitWho').textContent = `${saved.label} — ${saved.members.length} people`;
+  watchSession(); show('wait');
 });
 signInAnonymously(auth).catch(e => fail('Could not sign in: ' + e.message));
 if (!cryptoAvailable()) fail('This page needs https. Open it from the web address, not from a file.');
