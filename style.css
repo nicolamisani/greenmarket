@@ -38,9 +38,12 @@
   /* ---------------- top bar ---------------- */
   .topbar{position:sticky;top:0;z-index:20;background:rgba(14,22,33,.93);backdrop-filter:blur(8px);
     border-bottom:1px solid var(--rule);margin-bottom:18px}
-  .topin{max-width:1240px;margin:0 auto;padding:12px 22px;display:flex;align-items:center;gap:16px}
+  .topin{max-width:1240px;margin:0 auto;padding:12px 22px;display:flex;align-items:center;
+    gap:16px;justify-content:center;position:relative}
   .tag{font-size:12px;color:var(--muted)}
-  .topright{margin-left:auto;display:flex;align-items:center;gap:14px}
+  .topright{position:absolute;right:22px;top:50%;transform:translateY(-50%);
+    display:flex;align-items:center;gap:14px}
+  @media(max-width:640px){ .topright{right:14px} }
   .counter{font-size:12px;color:var(--muted)}
   .counter b{color:var(--fg)}
 

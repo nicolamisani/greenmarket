@@ -7,9 +7,9 @@ import { getAuth, signInAnonymously, onAuthStateChanged }
 import { getFirestore, doc, getDoc, collection, setDoc, updateDoc, onSnapshot, serverTimestamp }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-import { FIREBASE_CONFIG, INSTRUCTOR_PUBLIC_KEY } from './firebase-config.js?v=22';
-import { CASES, ICONS } from './cases.js?v=22';
-import { encryptPayload, cryptoAvailable, groupKeyB64, decryptWithGroupKey } from './crypto.js?v=22';
+import { FIREBASE_CONFIG, INSTRUCTOR_PUBLIC_KEY } from './firebase-config.js?v=23';
+import { CASES, ICONS } from './cases.js?v=23';
+import { encryptPayload, cryptoAvailable, groupKeyB64, decryptWithGroupKey } from './crypto.js?v=23';
 
 const app  = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -27,8 +27,12 @@ const state = {
 };
 const doneCount = () => state.slots.filter(s => s.done).length;
 const $ = id => document.getElementById(id);
-const show = which => ['intro','join','wait','home','market','sent','board','result'].forEach(id =>
-  $(id).classList.toggle('hidden', id !== which));
+const show = which => {
+  ['intro','join','wait','home','market','sent','board','result'].forEach(id =>
+    $(id).classList.toggle('hidden', id !== which));
+  // the intro carries its own big logo, so the bar would only repeat it
+  document.querySelector('.topbar').classList.toggle('hidden', which === 'intro');
+};
 const fail = msg => { $('err').textContent = msg; $('err').classList.remove('hidden'); };
 const clearErr = () => $('err').classList.add('hidden');
 
