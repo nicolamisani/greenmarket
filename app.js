@@ -7,9 +7,9 @@ import { getAuth, signInAnonymously, onAuthStateChanged }
 import { getFirestore, doc, getDoc, collection, setDoc, updateDoc, onSnapshot, serverTimestamp }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-import { FIREBASE_CONFIG, INSTRUCTOR_PUBLIC_KEY } from './firebase-config.js?v=32';
-import { CASES, ICONS } from './cases.js?v=32';
-import { encryptPayload, cryptoAvailable, groupKeyB64, decryptWithGroupKey } from './crypto.js?v=32';
+import { FIREBASE_CONFIG, INSTRUCTOR_PUBLIC_KEY } from './firebase-config.js?v=33';
+import { CASES, ICONS } from './cases.js?v=33';
+import { encryptPayload, cryptoAvailable, groupKeyB64, decryptWithGroupKey } from './crypto.js?v=33';
 
 const app  = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -29,6 +29,7 @@ const waitForAuth = ms => Promise.race([
 // state
 // -----------------------------------------------------------------------------
 const LS = 'gm_session_v1';
+const LS_WORK = 'gm_work_v1';          // this group's own writing and numbers
 const state = {
   uid:null, code:null, groupId:null, label:'', members:[],
   phase:'lobby', endsAt:null, open:0, submitted:false, score:null,
@@ -184,12 +185,20 @@ function watchSession() {
 
   onSnapshot(groupRef(), async snap => {     // the worker may submit on our behalf
     if (!snap.exists() && state.label) {      // the instructor cleared the lobby
-      localStorage.removeItem(LS);
+      localStorage.removeItem(LS); localStorage.removeItem(LS_WORK);
       state.submitted = false; state.score = null;
       state.slots = CASES.map(() => ({ green:'', add:'', des:'', prob:50, done:false }));
       return show('join');
     }
     const d = snap.data() || {};
+    // These are the numbers that were actually scored, including any market the
+    // worker filled in at 50% when the clock ran out. They outrank the local copy.
+    if (d.predictions) {
+      CASES.forEach((c,i) => {
+        const p = d.predictions[String(c.id)];
+        if (typeof p === 'number') { state.slots[i].prob = p; state.slots[i].done = true; }
+      });
+    }
     if (d.submitted && !state.submitted) { state.submitted = true; applyPhase(); }
     if (d.score != null) { state.score = d.score; renderSent(); }
     if (d.feedbackEnc && !state.feedback) {
@@ -340,7 +349,23 @@ async function saveMarket() {
 
 /** Probabilities travel in the clear — they are numbers, not personal data.
  *  The written answers travel inside the encrypted blob. */
+/** The writing is encrypted to the instructor and cannot be read back, so the
+ *  browser keeps its own copy. Without it a reload showed empty answers and
+ *  50% on every market in the reveal. */
+function saveWork() {
+  try { localStorage.setItem(LS_WORK, JSON.stringify({ code: state.code, slots: state.slots })); }
+  catch (e) { /* a full or blocked store is not worth failing over */ }
+}
+function loadWork(code) {
+  try {
+    const w = JSON.parse(localStorage.getItem(LS_WORK) || 'null');
+    if (w && w.code === code && Array.isArray(w.slots) && w.slots.length === CASES.length)
+      state.slots = w.slots;
+  } catch (e) { /* ignore a damaged store */ }
+}
+
 async function pushProgress() {
+  saveWork();
   const predictions = {};
   state.slots.forEach((s,i) => {
     if (s.done || s.green.trim() || s.add.trim() || s.des.trim()) predictions[CASES[i].id] = s.prob;
@@ -569,6 +594,7 @@ onAuthStateChanged(auth, async user => {
   // Only rejoin the saved market if it is still there and we are still in it.
   // Otherwise this is a new game: forget it and start from the rules.
   state.code = saved.code; state.label = saved.label; state.members = saved.members;
+  loadWork(saved.code);
   let ours = false;
   try { ours = (await getDoc(groupRef())).exists(); } catch (e) { ours = false; }
   const st = await sessionState(saved.code);

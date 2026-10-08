@@ -141,7 +141,8 @@
   /* ---------------- results ---------------- */
   .rev{padding:0;overflow:hidden}
   .revtop{display:flex;align-items:center;gap:16px;padding:14px 18px;background:var(--panel-2);border-bottom:1px solid var(--rule)}
-  .shot{width:104px;height:104px;object-fit:contain;background:#fff;border-radius:9px;flex:0 0 104px}
+  .shot{width:190px;height:190px;object-fit:contain;background:#fff;border-radius:11px;flex:0 0 190px}
+  @media(max-width:760px){.shot{width:150px;height:150px;flex:0 0 150px}}
   .revname .t{font-size:18px;font-weight:700;line-height:1.25}
   .revname .sub{font-size:12px;color:var(--muted);margin-top:2px}
   .revres{margin-left:auto;text-align:center;padding:11px 18px;border-radius:9px;min-width:150px}
