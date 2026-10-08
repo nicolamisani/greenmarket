@@ -7,9 +7,9 @@ import { getAuth, signInAnonymously, onAuthStateChanged }
 import { getFirestore, doc, getDoc, collection, setDoc, updateDoc, onSnapshot, serverTimestamp }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-import { FIREBASE_CONFIG, INSTRUCTOR_PUBLIC_KEY } from './firebase-config.js?v=28';
-import { CASES, ICONS } from './cases.js?v=28';
-import { encryptPayload, cryptoAvailable, groupKeyB64, decryptWithGroupKey } from './crypto.js?v=28';
+import { FIREBASE_CONFIG, INSTRUCTOR_PUBLIC_KEY } from './firebase-config.js?v=29';
+import { CASES, ICONS } from './cases.js?v=29';
+import { encryptPayload, cryptoAvailable, groupKeyB64, decryptWithGroupKey } from './crypto.js?v=29';
 
 const app  = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -498,6 +498,14 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) flush
 window.addEventListener('pagehide', flush);
 $('back').onclick = () => { flush(); renderHome(); };
 $('cancel').onclick = cancelMarket;
+
+// While a text box has focus the bet bar leaves its sticky position, so the
+// phone keyboard does not push it up over the writing.
+for (const id of ['aGreen', 'aAdd', 'aDest']) {
+  const box = $(id);
+  box.addEventListener('focus', () => document.body.classList.add('typing'));
+  box.addEventListener('blur',  () => document.body.classList.remove('typing'));
+}
 ['aGreen','aAdd','aDest'].forEach(id => {
   $(id).addEventListener('input', noteTyping);
   $(id).addEventListener('blur', flush);

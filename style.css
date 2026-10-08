@@ -108,6 +108,9 @@
   /* ---------------- the market bar ---------------- */
   .floater{position:sticky;bottom:0;z-index:5;background:var(--panel);border:1px solid var(--rule-strong);
     border-radius:11px;box-shadow:0 -6px 24px rgba(0,0,0,.5);padding:13px 18px;margin:14px 0 20px}
+  /* While the keyboard is up the bet must not ride above it and eat the screen.
+     It drops back into the flow, at the end of the page, where it is wanted. */
+  body.typing .floater{position:static}
   .floater .lab{font-size:17px;font-weight:600;margin-bottom:10px}
   .yesno{display:flex;gap:7px;margin-bottom:9px}
   .yesno div{flex:1;text-align:center;padding:10px 0;border-radius:7px;font-weight:700;font-size:17px;border:1px solid}
