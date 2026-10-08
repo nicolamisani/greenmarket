@@ -68,32 +68,7 @@ export const CASES = [
     ],
     "cat": "Home care · dish soap · 2020",
     "title": "Brisko Power Spray",
-    "rows": [
-      [
-        "New",
-        "The company puts the dish soap in a spray bottle. You spray the soap on the plate."
-      ],
-      [
-        "Result",
-        "The soap removes grease in half the time of the strongest other soap."
-      ],
-      [
-        "Water",
-        "You do not fill the sink. You do not open the tap."
-      ],
-      [
-        "User task",
-        "At each refill, you move the spray head to the new bottle."
-      ],
-      [
-        "Price",
-        "The price is 65 percent more than the usual soap of this company."
-      ],
-      [
-        "Users say",
-        "The price is too high."
-      ]
-    ]
+    "desc": "A manufacturer of dish soap sells a spray format in place of a squeeze bottle. The user sprays the soap directly onto the item. The suds activate on contact, so the task needs no running water and no filled sink. The maker states that the formula removes grease in half the time of the strongest competing product. It also carries three cleaning agents that conventional dish liquids do not use. The product launched as a starter kit with a trigger head. Refills arrive as a plain bottle, and the trigger moves from the old bottle to the new one at each refill. The price is 30.9 cents for each fluid ounce. The conventional liquid from the same brand is 18.8 cents."
   },
   {
     "id": 2,
@@ -104,28 +79,7 @@ export const CASES = [
     ],
     "cat": "Home care · spray cleaner · 2020",
     "title": "Rezil Refill Cartridge",
-    "rows": [
-      [
-        "New",
-        "You keep your old bottle. You buy a small cartridge with strong cleaner."
-      ],
-      [
-        "User task",
-        "You remove the spray head. You fill the bottle with water to a line. You put the cartridge in. You close the bottle."
-      ],
-      [
-        "Size",
-        "The cartridge is very small and light. It uses little space."
-      ],
-      [
-        "Price",
-        "The cartridge costs less than a new bottle."
-      ],
-      [
-        "Result",
-        "The cleaner does the same job as before."
-      ]
-    ]
+    "desc": "A manufacturer of household spray cleaner sells a concentrate cartridge for a bottle the customer already owns. At each refill the user removes the spray head and fills the bottle with tap water to a moulded line. The line marks 630 millilitres. The user then inserts the cartridge and closes the bottle. The cartridge holds a fraction of the volume of a full bottle and occupies little shelf or cupboard space. Transport weight falls in proportion. The cleaning formula is identical to the ready-mixed product. One cartridge costs less than one replacement bottle."
   },
   {
     "id": 3,
@@ -136,32 +90,7 @@ export const CASES = [
     ],
     "cat": "Personal care · deodorant · 2021",
     "title": "Orva Steel Case",
-    "rows": [
-      [
-        "New",
-        "The company sells a deodorant in a metal case. You keep the case and buy refills."
-      ],
-      [
-        "Quality",
-        "The case is strong. The company replaces a broken case for all time, at no cost."
-      ],
-      [
-        "Result",
-        "The deodorant is the same as before."
-      ],
-      [
-        "User task",
-        "You keep the case. You put a refill in the case."
-      ],
-      [
-        "Users say",
-        "The stick comes off its base during use. The company agrees and sends free replacements."
-      ],
-      [
-        "Price",
-        "The case costs more than a usual deodorant."
-      ]
-    ]
+    "desc": "A personal care company sells a deodorant in a refillable stainless steel case. The customer keeps the case and buys refill sticks for it. The case carries a warranty without end: the company replaces it or refunds it, and asks for no proof of purchase. The formula matches the conventional stick from the same brand. At each replacement the user inserts a refill into the case. After launch the company confirmed that the stick could separate from the applicator base during use, and it sent free replacement packs to buyers. The starter kit with the case costs more than a conventional stick."
   },
   {
     "id": 4,
@@ -172,24 +101,7 @@ export const CASES = [
     ],
     "cat": "Home care · laundry detergent · 2024",
     "title": "Quindo Cold 15",
-    "rows": [
-      [
-        "New",
-        "The company makes a detergent for short washes in cold water."
-      ],
-      [
-        "Result",
-        "In a 15 minute cold wash, the detergent removes dirt and smells that usual detergents leave."
-      ],
-      [
-        "User task",
-        "You use the same machine, the same drawer and the same quantity. Nothing changes."
-      ],
-      [
-        "Price",
-        "The price is more than the usual detergent of this company."
-      ]
-    ]
+    "desc": "A laundry detergent is formulated for short wash cycles at low temperature. The manufacturer states that conventional detergents leave invisible soil, and the compounds that cause body odour, when a cycle runs for a short time. This formula removes them in a cycle of fifteen minutes at thirty degrees. A short cold cycle draws less electricity than a long warm one. The dose, the dispenser drawer and the machine setting are the same as for the product it replaces. The detergent sells above the price of the standard range from the same brand."
   },
   {
     "id": 5,
@@ -200,32 +112,7 @@ export const CASES = [
     ],
     "cat": "Personal care · toothpaste · 2020",
     "title": "Puralist Toothpaste",
-    "rows": [
-      [
-        "New",
-        "The toothpaste has few ingredients. 99 percent of them come from nature."
-      ],
-      [
-        "Label",
-        "The front of the pack shows each ingredient and its function."
-      ],
-      [
-        "User task",
-        "You clean your teeth as before. Nothing changes."
-      ],
-      [
-        "Types",
-        "There is one type only. There is no type for white teeth and no type for sensitive teeth."
-      ],
-      [
-        "Price",
-        "The price is more than the usual toothpaste of this company."
-      ],
-      [
-        "Company says",
-        "Later, the company said that the price was too high."
-      ]
-    ]
+    "desc": "A toothpaste is formulated with a short ingredient list. The manufacturer states that 99.7 per cent of the content is of natural origin. The pack prints each ingredient and its function on the front. The tube is made from one material and enters standard recycling. Brushing is unchanged. The line holds a single variant. The brand's conventional range includes versions for whitening, for charcoal and for sensitive teeth, and this product offers none of them. It sells above the price of the conventional toothpaste from the same brand."
   },
   {
     "id": 6,
@@ -236,28 +123,7 @@ export const CASES = [
     ],
     "cat": "Personal care · hair care · 2020",
     "title": "Solibar Shampoo Bar",
-    "rows": [
-      [
-        "New",
-        "The company sells the shampoo as a solid bar in a paper box. There is no plastic bottle."
-      ],
-      [
-        "Size",
-        "The bar is much smaller and lighter than a bottle. It is easy to carry."
-      ],
-      [
-        "User task",
-        "You rub the bar on wet hair. You must learn a new method."
-      ],
-      [
-        "Users say",
-        "The bar needs more time to make foam. The wet bar makes dirt. There is no good place to put the bar."
-      ],
-      [
-        "Price",
-        "The price is near the price of a bottle."
-      ]
-    ]
+    "desc": "A hair care company sells shampoo as a solid bar in a paperboard sleeve. The format removes the plastic bottle. The bar weighs less than a bottle that holds the same number of washes. It also takes less space in transport and in luggage. In use the customer rubs the bar on wet hair, or works it into a lather in the hands. Reviews record that the bar takes longer to produce a lather than liquid shampoo. They also record that the wet bar leaves residue on surfaces. The bar needs a separate stand or dish between uses. The price is close to the price of a bottle."
   },
   {
     "id": 7,
@@ -268,28 +134,7 @@ export const CASES = [
     ],
     "cat": "Personal care · hair care · 2023",
     "title": "Nuvern Nine Shampoo",
-    "rows": [
-      [
-        "New",
-        "The company makes a shampoo with nine ingredients only. It has no sulfates, no silicones and no colors."
-      ],
-      [
-        "Result",
-        "The shampoo keeps the same ingredient against dandruff. It works as before."
-      ],
-      [
-        "Types",
-        "The company sells the full group of types, as before."
-      ],
-      [
-        "User task",
-        "Same bottle, same method. Nothing changes."
-      ],
-      [
-        "Price",
-        "The price is more than the usual shampoo of this company."
-      ]
-    ]
+    "desc": "An anti-dandruff shampoo is reformulated to nine ingredients. It carries no sulfates, no silicones and no added colour. The active ingredient that controls dandruff is the one used across the brand's conventional range, at the same concentration. The company sells the line in the full set of variants offered elsewhere in that range. The bottle, the pump and the washing method are unchanged. The product sells above the price of the brand's standard shampoos."
   },
   {
     "id": 8,
@@ -300,28 +145,7 @@ export const CASES = [
     ],
     "cat": "Personal care · hair care · 2025",
     "title": "Ondara Refill Pouch",
-    "rows": [
-      [
-        "New",
-        "The company sells the shampoo in a soft pouch. You keep your old bottle."
-      ],
-      [
-        "User task",
-        "You open the pouch. You pour the shampoo into your old bottle."
-      ],
-      [
-        "Product",
-        "The shampoo is the same as before. The formula does not change."
-      ],
-      [
-        "Price",
-        "One pouch costs less than a new bottle."
-      ],
-      [
-        "Material",
-        "The pouch uses much less plastic than a bottle."
-      ]
-    ]
+    "desc": "A hair care company sells shampoo in a flexible pouch, for refilling a bottle the customer already owns. The user opens the pouch and pours the contents into the bottle. The formula, the fragrance and the thickness match the bottled product. The pouch uses substantially less plastic by weight than a rigid bottle of the same volume, and it ships flat. One pouch costs less than one replacement bottle. The company does not always list the pouch as a separate product on its website."
   },
   {
     "id": 9,
@@ -332,32 +156,7 @@ export const CASES = [
     ],
     "cat": "Home care · dish soap · 2022",
     "title": "Shakel Dish Concentrate",
-    "rows": [
-      [
-        "New",
-        "You buy a small bag of strong soap and a bottle that you keep."
-      ],
-      [
-        "User task",
-        "At each refill, you fill the bottle with water, add the soap and shake the bottle."
-      ],
-      [
-        "Size",
-        "The bags are small and light. They are easy to keep."
-      ],
-      [
-        "Price",
-        "A bag costs less than a new bottle."
-      ],
-      [
-        "Users say",
-        "The soap does not mix fully. It makes lumps. The user must shake the bottle again."
-      ],
-      [
-        "Types",
-        "At the start, there is one smell only."
-      ]
-    ]
+    "desc": "A dish soap is sold as a concentrated gel in a small pouch, with a reusable bottle in the starter kit. At each refill the user fills the bottle with water, adds the concentrate, and shakes the bottle until the mixture combines. The pouches are flat and light and take little space in transport and in storage. A pouch costs less than a replacement bottle of ready-mixed liquid. Customer reviews record that the concentrate dissolves slowly, and that the mixture separates or forms lumps. The user must shake the bottle again before later use. The starter kit launched in a single fragrance."
   },
   {
     "id": 10,
@@ -368,27 +167,6 @@ export const CASES = [
     ],
     "cat": "Home care · floor cleaner · 2025",
     "title": "Tavro 10X Floor Gel",
-    "rows": [
-      [
-        "New",
-        "The company makes the cleaner very strong. The bottle is one fifth of the usual bottle."
-      ],
-      [
-        "Routine",
-        "Users of floor cleaner already put the cleaner in water. This routine does not change."
-      ],
-      [
-        "User task",
-        "The quantity changes. The company says that the first users did not know the correct quantity."
-      ],
-      [
-        "Result",
-        "You can also put the strong cleaner directly on difficult dirt. The usual cleaner cannot do this."
-      ],
-      [
-        "Price",
-        "For each use, the price is the same as the usual cleaner."
-      ]
-    ]
+    "desc": "A floor cleaner is sold as a gel concentrated ten times. One bottle of twelve fluid ounces provides sixty uses, which matches more than seven bottles of the brand's original dilution. For the same number of uses the format carries ninety per cent less weight and uses eighty-three per cent less plastic. Customers in this category already dilute floor cleaner in a bucket, and that step is unchanged, but the quantity for each bucket is different. The company reports that buyers were uncertain about the correct dose in the period after launch. The gel can also be applied directly to heavy soil, which the previous dilution could not. The price for each use matches the existing product."
   }
 ];

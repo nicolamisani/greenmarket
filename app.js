@@ -7,9 +7,9 @@ import { getAuth, signInAnonymously, onAuthStateChanged }
 import { getFirestore, doc, getDoc, collection, setDoc, updateDoc, onSnapshot, serverTimestamp }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-import { FIREBASE_CONFIG, INSTRUCTOR_PUBLIC_KEY } from './firebase-config.js?v=27';
-import { CASES, ICONS } from './cases.js?v=27';
-import { encryptPayload, cryptoAvailable, groupKeyB64, decryptWithGroupKey } from './crypto.js?v=27';
+import { FIREBASE_CONFIG, INSTRUCTOR_PUBLIC_KEY } from './firebase-config.js?v=28';
+import { CASES, ICONS } from './cases.js?v=28';
+import { encryptPayload, cryptoAvailable, groupKeyB64, decryptWithGroupKey } from './crypto.js?v=28';
 
 const app  = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -282,9 +282,10 @@ function openMarket(i) {
   $('cCat').textContent = c.cat;
   $('cTitle').textContent = c.title;
   $('cNum').textContent = `Market ${i+1} of ${CASES.length}`;
-  $('cRows').innerHTML = c.rows.map(([k,v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
+  $('cRows').textContent = c.desc;
   $('aGreen').value = s.green; $('aAdd').value = s.add; $('aDest').value = s.des;
   $('lock').textContent = s.done ? 'Save the change' : 'Save';
+  snapshot = { ...s };
   paintProb(); show('market'); renderClock();
   window.scrollTo({ top:0 });
 }
@@ -293,6 +294,7 @@ function openMarket(i) {
 // market that closes mid-sentence still has the words. The Save button stays, because
 // it is what marks a market as answered.
 let autoTimer = null, autoPending = false;
+let snapshot = null;                          // the market as it was when opened
 function noteTyping() {
   const s = state.slots[state.open];
   s.green = $('aGreen').value; s.add = $('aAdd').value; s.des = $('aDest').value;
@@ -483,9 +485,19 @@ $('toJoin').onclick = () => show('join');
 $('backIntro').onclick = () => show('intro');
 
 function flush() { clearTimeout(autoTimer); if (autoPending) { autoPending = false; pushProgress(); } }
+
+/** Walk away from a market and leave it as it was when it was opened. */
+function cancelMarket() {
+  clearTimeout(autoTimer); autoPending = false;
+  const s = state.slots[state.open];
+  Object.assign(s, snapshot);                 // whatever it held on the way in
+  pushProgress();                             // undo anything autosave already sent
+  renderHome();
+}
 document.addEventListener('visibilitychange', () => { if (document.hidden) flush(); });
 window.addEventListener('pagehide', flush);
 $('back').onclick = () => { flush(); renderHome(); };
+$('cancel').onclick = cancelMarket;
 ['aGreen','aAdd','aDest'].forEach(id => {
   $(id).addEventListener('input', noteTyping);
   $(id).addEventListener('blur', flush);

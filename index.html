@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Greenmarket</title>
-<link rel="stylesheet" href="style.css?v=27">
+<link rel="stylesheet" href="style.css?v=28">
 <style>
   /* ---- screens the networked client adds on top of the shared stylesheet ---- */
   .wrap{max-width:520px;margin:0 auto}
@@ -25,6 +25,8 @@
   .clock.calm{background:var(--yes-bg);border-color:var(--yes-line)} .clock.calm b{color:var(--yes)}
   .err{background:var(--no-bg);border:1px solid var(--no-line);border-radius:7px;padding:10px 13px;
     font-size:13px;color:#f0a98a;margin-bottom:12px}
+  .pdesc{margin:0;padding:16px 20px 18px;font-size:15.5px;line-height:1.62}
+  @media(max-width:820px){ .pdesc{padding:14px;font-size:15px} }
   /* an empty bar on the intro: same height, same rule, nothing in it */
   .topbar.bare .topin > *{visibility:hidden}
   /* ---- podium ---- */
@@ -258,22 +260,22 @@
         <div><div class="c" id="cCat"></div><div class="t" id="cTitle"></div></div>
         <div class="small" style="margin-left:auto" id="cNum"></div>
       </div>
-      <dl class="rows" id="cRows"></dl>
+      <p class="pdesc" id="cRows"></p>
     </div>
     <div class="panel">
       <div class="ask">
         <div class="q">1. What is the sustainability benefit?</div>
-        <div class="h">Write what the company shows to the buyer.</div>
+        <div class="h">Write the main possible sustainability benefits of the product.</div>
         <textarea id="aGreen"></textarea>
       </div>
       <div class="ask">
         <div class="q" style="color:var(--add)">2. What is the value added?</div>
-        <div class="h">Write what the user gets.</div>
+        <div class="h">Write the features of this product that can create value for the customer.</div>
         <textarea id="aAdd"></textarea>
       </div>
       <div class="ask" style="margin-bottom:0">
         <div class="q" style="color:var(--dest)">3. What is the value destroyed?</div>
-        <div class="h">Write what the user loses. A high price is always value destroyed.</div>
+        <div class="h">Write the features of this product that can destroy value for the customer.</div>
         <textarea id="aDest"></textarea>
       </div>
     </div>
@@ -281,11 +283,16 @@
       <div class="lab">Is this product still on sale today?</div>
       <div class="yesno"><div class="y">Yes <b id="pYes">50%</b></div><div class="n">No <b id="pNo">50%</b></div></div>
       <div class="frow">
-        <input type="range" id="prob" min="5" max="95" step="5" value="50">
+        <div class="slidewrap">
+          <input type="range" id="prob" min="5" max="95" step="5" value="50">
+          <div class="ticks"><span>certainly no</span><span>certainly yes</span></div>
+        </div>
         <div class="probval" id="probVal">50%</div>
         <button id="lock">Save</button>
       </div>
-      <div class="ticks"><span>certainly no</span><span>I do not know</span><span>certainly yes</span></div>
+      <div class="cancelrow">
+        <button class="ghost" id="cancel">Leave without saving</button>
+      </div>
     </div>
   </div>
 
@@ -325,6 +332,6 @@
   </div>
 </div>
 
-<script type="module" src="app.js?v=27"></script>
+<script type="module" src="app.js?v=28"></script>
 </body>
 </html>
