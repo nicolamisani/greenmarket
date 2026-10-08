@@ -7,13 +7,23 @@ import { getAuth, signInAnonymously, onAuthStateChanged }
 import { getFirestore, doc, getDoc, collection, setDoc, updateDoc, onSnapshot, serverTimestamp }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-import { FIREBASE_CONFIG, INSTRUCTOR_PUBLIC_KEY } from './firebase-config.js?v=29';
-import { CASES, ICONS } from './cases.js?v=29';
-import { encryptPayload, cryptoAvailable, groupKeyB64, decryptWithGroupKey } from './crypto.js?v=29';
+import { FIREBASE_CONFIG, INSTRUCTOR_PUBLIC_KEY } from './firebase-config.js?v=30';
+import { CASES, ICONS } from './cases.js?v=30';
+import { encryptPayload, cryptoAvailable, groupKeyB64, decryptWithGroupKey } from './crypto.js?v=30';
 
 const app  = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
 const db   = getFirestore(app);
+
+// Firestore refuses every read until the anonymous sign-in has landed. A phone
+// on a slow link can show the join screen well before that, and a tap then came
+// back as "No connection", which was untrue. Everything that reads waits here.
+let markAuthed;
+const authReady = new Promise(res => { markAuthed = res; });
+const waitForAuth = ms => Promise.race([
+  authReady,
+  new Promise((_, rej) => setTimeout(() => rej(new Error('auth-timeout')), ms)),
+]);
 
 // -----------------------------------------------------------------------------
 // state
@@ -52,10 +62,14 @@ const JOINABLE = ['lobby','playing','countdown'];
 /** Is this market open? Returns 'open', 'closed', 'none' or 'offline'. */
 async function sessionState(code) {
   try {
+    await waitForAuth(12000);
     const snap = await getDoc(doc(db, 'sessions', code));
     if (!snap.exists()) return 'none';
     return JOINABLE.includes(snap.data().phase) ? 'open' : 'closed';
-  } catch (e) { return 'offline'; }
+  } catch (e) {
+    console.warn('sessionState failed:', e.code || e.message);
+    return 'offline';
+  }
 }
 
 let waitTimer = null;
@@ -75,6 +89,9 @@ function waitForMarket(code, label, members) {
 }
 
 $('doJoin').onclick = async () => {
+  const btn = $('doJoin'), was = btn.textContent;
+  const busy = t => { btn.disabled = true; btn.textContent = t; };
+  const free = () => { btn.disabled = false; btn.textContent = was; };
   const code  = $('code').value.replace(/\D/g,'');
   const label = $('gname').value.trim();
   const members = [...$('members').querySelectorAll('input')]
@@ -83,10 +100,12 @@ $('doJoin').onclick = async () => {
   if (!label || !members.length) return fail('Write the group name and one name.');
   if (!cryptoAvailable()) return fail('This page needs https. Nothing was sent.');
 
+  busy('One moment…');
   const st = await sessionState(code);
+  free();
   if (st === 'none')    return waitForMarket(code, label, members);
   if (st === 'closed')  return fail('This market is closed. You cannot join now.');
-  if (st === 'offline') return fail('No connection. Try again.');
+  if (st === 'offline') return fail('The connection is slow. Touch the button again.');
   doJoin(code, label, members);
 };
 
@@ -520,6 +539,7 @@ $('prob').oninput = e => { state.slots[state.open].prob = +e.target.value; paint
 onAuthStateChanged(auth, async user => {
   if (!user) return;
   state.uid = user.uid; state.groupId = user.uid;
+  markAuthed(user);
   const saved = JSON.parse(localStorage.getItem(LS) || 'null');
   if (!saved) return show('intro');
 
@@ -538,5 +558,5 @@ onAuthStateChanged(auth, async user => {
   $('waitWho').textContent = `${saved.label} — ${saved.members.length} people`;
   watchSession(); show('wait');
 });
-signInAnonymously(auth).catch(e => fail('Could not sign in: ' + e.message));
+signInAnonymously(auth).catch(e => fail('Could not start: ' + (e.code || e.message)));
 if (!cryptoAvailable()) fail('This page needs https. Open it from the web address, not from a file.');
