@@ -7,9 +7,9 @@ import { getAuth, signInAnonymously, onAuthStateChanged }
 import { getFirestore, doc, getDoc, collection, setDoc, updateDoc, onSnapshot, serverTimestamp }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-import { FIREBASE_CONFIG, INSTRUCTOR_PUBLIC_KEY } from './firebase-config.js?v=35';
-import { CASES, ICONS } from './cases.js?v=35';
-import { encryptPayload, cryptoAvailable, groupKeyB64, decryptWithGroupKey } from './crypto.js?v=35';
+import { FIREBASE_CONFIG, INSTRUCTOR_PUBLIC_KEY } from './firebase-config.js?v=36';
+import { CASES, ICONS } from './cases.js?v=36';
+import { encryptPayload, cryptoAvailable, groupKeyB64, decryptWithGroupKey } from './crypto.js?v=36';
 
 const app  = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -117,6 +117,15 @@ $('doJoin').onclick = async () => {
 async function doJoin(code, label, members) {
   try {
     clearErr();
+    // Joining is the start of a round. Anything left over from a previous one —
+    // a submission, a score, last round's commentary — would otherwise decide
+    // which screen this group sees, and strand it on "your answers are sent".
+    Object.assign(state, {
+      phase:'lobby', endsAt:null, submitted:false, score:null,
+      reveal:null, feedback:null, board:null, podiumStep:0, open:0,
+    });
+    if (!loadedWorkFor(code)) state.slots = CASES.map(
+      () => ({ green:'', add:'', des:'', prob:50, done:false }));
     state.code = code; state.label = label; state.members = members;
     state.groupId = state.uid;
     const enc = await encryptPayload(
@@ -385,10 +394,16 @@ function saveWork() {
 function loadWork(code) {
   try {
     const w = JSON.parse(localStorage.getItem(LS_WORK) || 'null');
-    if (w && w.code === code && Array.isArray(w.slots) && w.slots.length === CASES.length)
+    if (w && w.code === code && Array.isArray(w.slots) && w.slots.length === CASES.length
+        && w.slots.every(s => s && typeof s.green === 'string' && typeof s.add === 'string'
+                           && typeof s.des === 'string')) {
       state.slots = w.slots;
+      return true;
+    }
   } catch (e) { /* ignore a damaged store */ }
+  return false;
 }
+const loadedWorkFor = code => loadWork(code);
 
 async function pushProgress() {
   saveWork();
