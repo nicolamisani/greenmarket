@@ -7,9 +7,9 @@ import { getAuth, signInAnonymously, onAuthStateChanged }
 import { getFirestore, doc, getDoc, collection, setDoc, updateDoc, onSnapshot, serverTimestamp }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-import { FIREBASE_CONFIG, INSTRUCTOR_PUBLIC_KEY } from './firebase-config.js?v=37';
-import { CASES, ICONS } from './cases.js?v=37';
-import { encryptPayload, cryptoAvailable, groupKeyB64, decryptWithGroupKey } from './crypto.js?v=37';
+import { FIREBASE_CONFIG, INSTRUCTOR_PUBLIC_KEY } from './firebase-config.js?v=38';
+import { CASES, ICONS } from './cases.js?v=38';
+import { encryptPayload, cryptoAvailable, groupKeyB64, decryptWithGroupKey } from './crypto.js?v=38';
 
 const app  = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -479,6 +479,9 @@ function renderSent() {
 // the reveal — only reachable once the instructor releases it
 // -----------------------------------------------------------------------------
 const esc = s => String(s).replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+// the AI returns short items; one period between them reads better than a semicolon
+const sentences = list => (list || []).map(s => String(s).trim().replace(/[.;,]+$/, ''))
+                                      .filter(Boolean).map(s => s + '.').join(' ');
 const said = (lab, txt) => `<p class="said"><b>${lab}</b>` +
   (txt && txt.trim() ? `<span>“${esc(txt.trim())}”</span>`
                      : '<span class="small">You wrote nothing.</span>') + '</p>';
@@ -562,8 +565,8 @@ function renderReveal() {
           ${said('Value added', s.add)}
           ${said('Value destroyed', s.des)}
           ${f ? `<p class="aibox"><i>${esc(f.summary)}</i>
-             ${f.right?.length  ? `<span class="good">Right: ${esc(f.right.join('; '))}</span>`  : ''}
-             ${f.missed?.length ? `<span class="bad">Missed: ${esc(f.missed.join('; '))}</span>` : ''}</p>` : ''}
+             ${f.right?.length  ? `<span class="good">Right: ${esc(sentences(f.right))}</span>`  : ''}
+             ${f.missed?.length ? `<span class="bad">Missed: ${esc(sentences(f.missed))}</span>` : ''}</p>` : ''}
         </div>
         <div><h3>The market thought that</h3>
           <p class="fact g">${esc(m.green)}</p>
@@ -599,8 +602,8 @@ function downloadMd() {
          + `  Value added:            ${s.add   || '(nothing)'}\n`
          + `  Value destroyed:        ${s.des   || '(nothing)'}\n\n`
          + (f ? wrap(f.summary) + '\n'
-              + (f.right?.length  ? `  Right:  ${f.right.join('; ')}\n`  : '')
-              + (f.missed?.length ? `  Missed: ${f.missed.join('; ')}\n` : '') + '\n' : '')
+              + (f.right?.length  ? `  Right:  ${sentences(f.right)}\n`  : '')
+              + (f.missed?.length ? `  Missed: ${sentences(f.missed)}\n` : '') + '\n' : '')
          + `THE MARKET\n  ${m.green}\n`
          + m.add.map(x => `  + ${x}\n`).join('')
          + m.des.map(x => `  - ${x}\n`).join('')
