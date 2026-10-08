@@ -144,11 +144,12 @@
   .shot{width:104px;height:104px;object-fit:contain;background:#fff;border-radius:9px;flex:0 0 104px}
   .revname .t{font-size:18px;font-weight:700;line-height:1.25}
   .revname .sub{font-size:12px;color:var(--muted);margin-top:2px}
-  .revres{margin-left:auto;text-align:right;padding:8px 14px;border-radius:8px}
-  .revres.yes{background:var(--yes-bg);border:1px solid var(--yes-line)}
-  .revres.no{background:var(--no-bg);border:1px solid var(--no-line)}
-  .revres .big{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
-  .revres.yes .big{color:var(--yes)} .revres.no .big{color:var(--no)}
+  .revres{margin-left:auto;text-align:center;padding:11px 18px;border-radius:9px;min-width:150px}
+  .revres.yes{background:var(--yes);border:1px solid var(--yes)}
+  .revres.no{background:var(--no);border:1px solid var(--no)}
+  .revres .big{font-size:15px;font-weight:800;letter-spacing:.05em;color:#fff}
+  .revres .small{color:rgba(255,255,255,.85);margin-top:2px}
+  .revname .t i{font-style:normal;color:var(--muted);font-weight:600}
   @media(max-width:760px){.revtop{flex-wrap:wrap}.revres{margin-left:0}}
   .cmp{display:grid;grid-template-columns:1fr 1fr}
   @media(max-width:760px){.cmp{grid-template-columns:1fr}}

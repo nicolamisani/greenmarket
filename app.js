@@ -7,9 +7,9 @@ import { getAuth, signInAnonymously, onAuthStateChanged }
 import { getFirestore, doc, getDoc, collection, setDoc, updateDoc, onSnapshot, serverTimestamp }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-import { FIREBASE_CONFIG, INSTRUCTOR_PUBLIC_KEY } from './firebase-config.js?v=31';
-import { CASES, ICONS } from './cases.js?v=31';
-import { encryptPayload, cryptoAvailable, groupKeyB64, decryptWithGroupKey } from './crypto.js?v=31';
+import { FIREBASE_CONFIG, INSTRUCTOR_PUBLIC_KEY } from './firebase-config.js?v=32';
+import { CASES, ICONS } from './cases.js?v=32';
+import { encryptPayload, cryptoAvailable, groupKeyB64, decryptWithGroupKey } from './crypto.js?v=32';
 
 const app  = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -452,11 +452,11 @@ function renderReveal() {
       <div class="revtop">
         ${m.photo ? `<img class="shot" src="${m.photo}" alt="">` : ''}
         <div class="revname">
-          <div class="t">${esc(m.real.split(' · ')[0])}</div>
+          <div class="t"><i>${esc(c.title)}</i> was <b>${esc(m.real.split(' · ')[0])}</b></div>
           <div class="sub">${esc(m.real.split(' · ').slice(1).join(' · '))}</div>
         </div>
         <div class="revres ${m.alive?'yes':'no'}">
-          <div class="big">${m.alive ? 'Yes · on sale' : 'No · not on sale'}</div>
+          <div class="big">${m.alive ? 'YES · ON SALE' : 'NO · NOT ON SALE'}</div>
           <div class="small">You said ${s.prob}%</div>
         </div>
       </div>
@@ -482,28 +482,39 @@ function renderReveal() {
 
 function downloadMd() {
   const fb = state.feedback;
-  let md = `# Greenmarket — ${state.label}\n\n`
-         + `People: ${state.members.join(', ')}\n\n`
-         + `Points: ${state.score ?? 0}\n\n`;
-  if (fb?.overall) md += `${fb.overall}\n\n`;
+  const rule = '='.repeat(66), thin = '-'.repeat(66);
+  const wrap = (s, w = 66) => String(s).replace(
+    new RegExp(`(?![^\\n]{1,${w}}$)([^\\n]{1,${w}})\\s`, 'g'), '$1\n');
+
+  let txt = `GREENMARKET — ${state.label.toUpperCase()}\n${rule}\n`
+          + `People: ${state.members.join(', ')}\n`
+          + `Points: ${state.score ?? 0}\n\n`;
+  if (fb?.overall) txt += wrap(fb.overall) + '\n\n';
+
   CASES.forEach((c,i) => {
     const m = state.reveal?.[String(c.id)], s = state.slots[i];
     if (!m) return;
     const f = fb?.markets?.[String(c.id)];
-    md += `## ${m.real}\n\n`
-        + `Result: **${m.alive ? 'still on sale' : 'not on sale'}** · you said **${s.prob}%**\n\n`
-        + `**You wrote**\n\n- Sustainability benefit: ${s.green || '(nothing)'}\n`
-        + `- Value added: ${s.add || '(nothing)'}\n- Value destroyed: ${s.des || '(nothing)'}\n\n`
-        + (f ? `*${f.summary}*\n\n`
-             + (f.right?.length  ? `Right: ${f.right.join('; ')}\n\n` : '')
-             + (f.missed?.length ? `Missed: ${f.missed.join('; ')}\n\n` : '') : '')
-        + `**The market**\n\n- ${m.green}\n`
-        + m.add.map(x => `- ${x}\n`).join('') + m.des.map(x => `- ${x}\n`).join('')
-        + `\n${m.why}\n\n`;
+    txt += `${thin}\n${c.title} was ${m.real}\n${thin}\n`
+         + `Outcome: ${m.alive ? 'still on sale' : 'not on sale'}`
+         + `   You said: ${s.prob}%\n\n`
+         + `YOU WROTE\n`
+         + `  Sustainability benefit: ${s.green || '(nothing)'}\n`
+         + `  Value added:            ${s.add   || '(nothing)'}\n`
+         + `  Value destroyed:        ${s.des   || '(nothing)'}\n\n`
+         + (f ? wrap(f.summary) + '\n'
+              + (f.right?.length  ? `  Right:  ${f.right.join('; ')}\n`  : '')
+              + (f.missed?.length ? `  Missed: ${f.missed.join('; ')}\n` : '') + '\n' : '')
+         + `THE MARKET\n  ${m.green}\n`
+         + m.add.map(x => `  + ${x}\n`).join('')
+         + m.des.map(x => `  - ${x}\n`).join('')
+         + '\n' + wrap(m.why) + '\n\n';
   });
+  txt += `${rule}\n30296 Global Sustainability Strategy · Bocconi University\n`;
+
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([md], { type:'text/markdown' }));
-  a.download = `greenmarket-${state.label.replace(/[^\w]+/g,'-').toLowerCase()}.md`;
+  a.href = URL.createObjectURL(new Blob([txt], { type:'text/plain;charset=utf-8' }));
+  a.download = `greenmarket-${state.label.replace(/[^\w]+/g,'-').toLowerCase()}.txt`;
   a.click(); URL.revokeObjectURL(a.href);
 }
 
