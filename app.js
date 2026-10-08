@@ -7,9 +7,9 @@ import { getAuth, signInAnonymously, onAuthStateChanged }
 import { getFirestore, doc, getDoc, collection, setDoc, updateDoc, onSnapshot, serverTimestamp }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-import { FIREBASE_CONFIG, INSTRUCTOR_PUBLIC_KEY } from './firebase-config.js?v=33';
-import { CASES, ICONS } from './cases.js?v=33';
-import { encryptPayload, cryptoAvailable, groupKeyB64, decryptWithGroupKey } from './crypto.js?v=33';
+import { FIREBASE_CONFIG, INSTRUCTOR_PUBLIC_KEY } from './firebase-config.js?v=34';
+import { CASES, ICONS } from './cases.js?v=34';
+import { encryptPayload, cryptoAvailable, groupKeyB64, decryptWithGroupKey } from './crypto.js?v=34';
 
 const app  = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -218,7 +218,7 @@ function watchSession() {
 
 function applyPhase() {
   clearErr();
-  if (state.phase === 'reveal' && state.reveal) { renderReveal(); return show('result'); }
+  if (state.phase === 'reveal') { renderReveal(); return show('result'); }
   if (state.phase === 'podium') { renderBoard(); return show('board'); }
   if (state.submitted || state.phase === 'submitted'
       || state.phase === 'reveal') { renderSent(); return show('sent'); }
@@ -464,7 +464,11 @@ function renderBoard() {
 }
 
 function renderReveal() {
-  if (!state.reveal) return;
+  if (!state.reveal) {                     // the payload is a moment behind
+    $('revTitle').textContent = 'The products are coming…';
+    $('revList').innerHTML = ''; $('revOverall').innerHTML = '';
+    return;
+  }
   const fb = state.feedback;
   $('revTitle').textContent = `${state.label}: ${state.score > 0 ? '+' : ''}${state.score ?? 0} points`;
   $('revOverall').innerHTML = fb?.overall
