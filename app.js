@@ -7,9 +7,9 @@ import { getAuth, signInAnonymously, onAuthStateChanged }
 import { getFirestore, doc, getDoc, collection, setDoc, updateDoc, onSnapshot, serverTimestamp }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-import { FIREBASE_CONFIG, INSTRUCTOR_PUBLIC_KEY } from './firebase-config.js?v=38';
-import { CASES, ICONS } from './cases.js?v=38';
-import { encryptPayload, cryptoAvailable, groupKeyB64, decryptWithGroupKey } from './crypto.js?v=38';
+import { FIREBASE_CONFIG, INSTRUCTOR_PUBLIC_KEY } from './firebase-config.js?v=39';
+import { CASES, ICONS } from './cases.js?v=39';
+import { encryptPayload, cryptoAvailable, groupKeyB64, decryptWithGroupKey } from './crypto.js?v=39';
 
 const app  = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -671,6 +671,13 @@ $('prob').oninput = e => { state.slots[state.open].prob = +e.target.value; paint
 // -----------------------------------------------------------------------------
 // The page ships with every screen hidden, so without this the student stares
 // at an empty black page until the anonymous sign-in lands.
+// A demonstration machine must not walk back into yesterday's market. Opening
+// the page as .../greenmarket/?fresh forgets whatever is saved and starts over.
+if (/[?&]fresh\b/.test(location.search) || location.hash === '#fresh') {
+  localStorage.removeItem(LS); localStorage.removeItem(LS_WORK);
+  try { history.replaceState(null, '', location.pathname); } catch (e) {}
+}
+
 if (!localStorage.getItem(LS)) show('intro');
 
 onAuthStateChanged(auth, async user => {
