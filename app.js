@@ -7,9 +7,9 @@ import { getAuth, signInAnonymously, onAuthStateChanged }
 import { getFirestore, doc, getDoc, collection, setDoc, updateDoc, onSnapshot, serverTimestamp }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-import { FIREBASE_CONFIG, INSTRUCTOR_PUBLIC_KEY } from './firebase-config.js?v=36';
-import { CASES, ICONS } from './cases.js?v=36';
-import { encryptPayload, cryptoAvailable, groupKeyB64, decryptWithGroupKey } from './crypto.js?v=36';
+import { FIREBASE_CONFIG, INSTRUCTOR_PUBLIC_KEY } from './firebase-config.js?v=37';
+import { CASES, ICONS } from './cases.js?v=37';
+import { encryptPayload, cryptoAvailable, groupKeyB64, decryptWithGroupKey } from './crypto.js?v=37';
 
 const app  = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -128,8 +128,24 @@ async function doJoin(code, label, members) {
       () => ({ green:'', add:'', des:'', prob:50, done:false }));
     state.code = code; state.label = label; state.members = members;
     state.groupId = state.uid;
+    // This browser may already be in this market — a reload, a second tap, or a
+    // group that came back to the join screen. Writing the document again would
+    // be an update, which the rules refuse while the market is still in the
+    // lobby, and the group would be told the market is shut. It is already in.
+    let already = false;
+    try { already = (await getDoc(groupRef())).exists(); } catch (e) { already = false; }
     const enc = await encryptPayload(
       { label, members, groupKey: await groupKeyB64() }, INSTRUCTOR_PUBLIC_KEY);
+    if (already) {
+      localStorage.setItem(LS, JSON.stringify({ code, label, members }));
+      watchSession(); show('wait');
+      $('waitBack').classList.add('hidden');
+      $('waitTitle').textContent = 'You are in';
+      $('waitText').textContent = 'Wait. Your instructor starts the game. Keep this page open.';
+      $('waitWho').textContent = `${label} — ${members.length} people`;
+      $('who').textContent = label;
+      return;
+    }
     await setDoc(groupRef(), {
       label, enc, ownerUid: state.uid,
       predictions: {}, done: 0, submitted: false, score: null,
