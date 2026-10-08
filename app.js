@@ -7,9 +7,9 @@ import { getAuth, signInAnonymously, onAuthStateChanged }
 import { getFirestore, doc, getDoc, collection, setDoc, updateDoc, onSnapshot, serverTimestamp }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-import { FIREBASE_CONFIG, INSTRUCTOR_PUBLIC_KEY } from './firebase-config.js?v=30';
-import { CASES, ICONS } from './cases.js?v=30';
-import { encryptPayload, cryptoAvailable, groupKeyB64, decryptWithGroupKey } from './crypto.js?v=30';
+import { FIREBASE_CONFIG, INSTRUCTOR_PUBLIC_KEY } from './firebase-config.js?v=31';
+import { CASES, ICONS } from './cases.js?v=31';
+import { encryptPayload, cryptoAvailable, groupKeyB64, decryptWithGroupKey } from './crypto.js?v=31';
 
 const app  = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -210,8 +210,8 @@ function watchSession() {
 function applyPhase() {
   clearErr();
   if (state.phase === 'reveal' && state.reveal) { renderReveal(); return show('result'); }
-  if (state.phase === 'podium' && state.board) { renderBoard(); return show('board'); }
-  if (state.submitted || state.phase === 'submitted' || state.phase === 'podium'
+  if (state.phase === 'podium') { renderBoard(); return show('board'); }
+  if (state.submitted || state.phase === 'submitted'
       || state.phase === 'reveal') { renderSent(); return show('sent'); }
   if (state.phase === 'lobby') { keepAwake(false); return show('wait'); }
   keepAwake(true);
@@ -372,9 +372,15 @@ async function submitAll(auto = false) {
 function renderSent() {
   $('sentTbl').innerHTML = CASES.map((c,i) =>
     `<tr><td>${c.title}</td><td>${state.slots[i].prob}%</td></tr>`).join('');
-  $('sentText').textContent = state.score == null
-    ? 'Wait. Your instructor shows the results.'
-    : `Your points: ${state.score > 0 ? '+' : ''}${state.score}. Wait for the leaderboard.`;
+  if (state.score == null) {
+    $('sentText').innerHTML = 'Wait. Your instructor shows the results.';
+  } else {
+    const sign = state.score > 0 ? '+' : '';
+    const tone = state.score > 0 ? 'up' : state.score < 0 ? 'down' : 'flat';
+    $('sentText').innerHTML =
+      `<span class="scoreline">Your points <b class="big ${tone}">${sign}${state.score}</b></span>`
+      + `<span class="scorenote">Wait for the leaderboard.</span>`;
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -399,6 +405,12 @@ function plinth(row, place) {
 }
 
 function renderBoard() {
+  if (!state.board) {
+    $('boardTitle').textContent = 'The results are coming';
+    $('boardSub').textContent   = 'Wait a moment.';
+    $('podium').innerHTML = ''; $('boardList').innerHTML = '';
+    return;
+  }
   if (!state.board) return;
   const step = state.podiumStep || 0;
   const by = r => state.board.find(x => x.rank === r);
