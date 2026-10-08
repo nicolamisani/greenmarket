@@ -145,6 +145,7 @@
   @media(max-width:760px){.shot{width:150px;height:150px;flex:0 0 150px}}
   .revname .t{font-size:18px;font-weight:700;line-height:1.25}
   .revname .sub{font-size:12px;color:var(--muted);margin-top:2px}
+  .pdesc{margin:0;padding:16px 20px 18px;font-size:15.5px;line-height:1.62}
   .revres{margin-left:auto;text-align:center;padding:11px 18px;border-radius:9px;min-width:150px}
   .revres.yes{background:var(--yes);border:1px solid var(--yes)}
   .revres.no{background:var(--no);border:1px solid var(--no)}

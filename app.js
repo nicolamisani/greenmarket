@@ -7,9 +7,9 @@ import { getAuth, signInAnonymously, onAuthStateChanged }
 import { getFirestore, doc, getDoc, collection, setDoc, updateDoc, onSnapshot, serverTimestamp }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-import { FIREBASE_CONFIG, INSTRUCTOR_PUBLIC_KEY } from './firebase-config.js?v=34';
-import { CASES, ICONS } from './cases.js?v=34';
-import { encryptPayload, cryptoAvailable, groupKeyB64, decryptWithGroupKey } from './crypto.js?v=34';
+import { FIREBASE_CONFIG, INSTRUCTOR_PUBLIC_KEY } from './firebase-config.js?v=35';
+import { CASES, ICONS } from './cases.js?v=35';
+import { encryptPayload, cryptoAvailable, groupKeyB64, decryptWithGroupKey } from './crypto.js?v=35';
 
 const app  = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -76,6 +76,7 @@ async function sessionState(code) {
 let waitTimer = null;
 function waitForMarket(code, label, members) {
   show('wait');
+  $('waitBack').classList.remove('hidden');
   $('waitTitle').textContent = 'The market is not open';
   $('waitText').textContent  = `Wait. Your instructor opens market ${code} soon. This page tries again by itself.`;
   $('waitWho').textContent   = '';
@@ -83,6 +84,7 @@ function waitForMarket(code, label, members) {
   waitTimer = setInterval(async () => {
     if (await sessionState(code) === 'open') {
       clearInterval(waitTimer); waitTimer = null;
+      $('waitBack').classList.add('hidden');
       $('waitTitle').textContent = 'You are in';
       doJoin(code, label, members);
     }
@@ -107,7 +109,9 @@ $('doJoin').onclick = async () => {
   if (st === 'none')    return waitForMarket(code, label, members);
   if (st === 'closed')  return fail('This market is closed. You cannot join now.');
   if (st === 'offline') return fail('The connection is slow. Touch the button again.');
-  doJoin(code, label, members);
+  busy('One moment…');
+  await doJoin(code, label, members);
+  free();
 };
 
 async function doJoin(code, label, members) {
@@ -125,6 +129,7 @@ async function doJoin(code, label, members) {
     localStorage.setItem(LS, JSON.stringify({ code, label, members }));
     watchSession();
     show('wait');
+    $('waitBack').classList.add('hidden');
     $('waitTitle').textContent = 'You are in';
     $('waitText').textContent = 'Wait. Your instructor starts the game. Keep this page open.';
     $('waitWho').textContent = `${label} — ${members.length} people`;
@@ -174,20 +179,30 @@ document.addEventListener('visibilitychange', () => {
   if (!document.hidden && (state.phase === 'playing' || state.phase === 'countdown')) keepAwake(true);
 });
 
+let watchers = [];
+function stopWatching() { watchers.forEach(u => { try { u(); } catch (e) {} }); watchers = []; }
+
 function watchSession() {
-  onSnapshot(sessionRef(), snap => {
+  stopWatching();                           // a rejoin must not stack listeners
+  watchers.push(onSnapshot(sessionRef(), snap => {
     const d = snap.data() || {};
     state.phase  = d.phase || 'lobby';
     state.endsAt = d.countdownEndsAt ? d.countdownEndsAt.toMillis() : null;
     state.podiumStep = d.podiumStep ?? 0;
     applyPhase();
-  }, e => fail('Lost the connection: ' + e.message));
+  }, e => fail('Lost the connection: ' + e.message)));
 
-  onSnapshot(groupRef(), async snap => {     // the worker may submit on our behalf
+  watchers.push(onSnapshot(groupRef(), async snap => {     // the worker may submit on our behalf
     if (!snap.exists() && state.label) {      // the instructor cleared the lobby
       localStorage.removeItem(LS); localStorage.removeItem(LS_WORK);
-      state.submitted = false; state.score = null;
-      state.slots = CASES.map(() => ({ green:'', add:'', des:'', prob:50, done:false }));
+      stopWatching();                         // or the session listener drags us on
+      Object.assign(state, {
+        code:null, groupId:null, label:'', members:[], phase:'lobby', endsAt:null,
+        submitted:false, score:null, reveal:null, feedback:null, board:null,
+        podiumStep:0, open:0,
+        slots: CASES.map(() => ({ green:'', add:'', des:'', prob:50, done:false })),
+      });
+      $('code').value = ''; $('gname').value = '';
       return show('join');
     }
     const d = snap.data() || {};
@@ -205,16 +220,24 @@ function watchSession() {
       try { state.feedback = await decryptWithGroupKey(d.feedbackEnc); renderReveal(); }
       catch (e) { /* a different browser, or the key was cleared */ }
     }
-  });
+  }));
 
-  onSnapshot(doc(db, 'sessions', state.code, 'public', 'leaderboard'), snap => {
+  watchers.push(onSnapshot(doc(db, 'sessions', state.code, 'public', 'leaderboard'), snap => {
     if (snap.exists()) { state.board = snap.data().rows || []; renderBoard(); }
-  });
+  }));
 
-  onSnapshot(doc(db, 'sessions', state.code, 'public', 'reveal'), snap => {
-    if (snap.exists()) { state.reveal = snap.data().markets; renderReveal(); }
-  });
+  // The outcomes are published when the market closes, well before the
+  // instructor reveals them. Holding them in the page would put the answer key
+  // on every phone during the podium, so they are only fetched on the word go.
+  watchers.push(onSnapshot(sessionRef(), s => {
+    if ((s.data() || {}).phase !== 'reveal' || revealSub) return;
+    revealSub = onSnapshot(doc(db, 'sessions', state.code, 'public', 'reveal'), snap => {
+      if (snap.exists()) { state.reveal = snap.data().markets; renderReveal(); }
+    });
+    watchers.push(() => { revealSub && revealSub(); revealSub = null; });
+  }));
 }
+let revealSub = null;
 
 function applyPhase() {
   clearErr();
@@ -224,6 +247,9 @@ function applyPhase() {
       || state.phase === 'reveal') { renderSent(); return show('sent'); }
   if (state.phase === 'lobby') { keepAwake(false); return show('wait'); }
   keepAwake(true);
+  // Someone writing inside a market stays there when the clock starts; only the
+  // clock is repainted. Otherwise every phone jumps to the grid mid-sentence.
+  if (!$('market').classList.contains('hidden')) { renderClock(); return; }
   renderHome();                               // playing or countdown
 }
 
@@ -368,7 +394,10 @@ async function pushProgress() {
   saveWork();
   const predictions = {};
   state.slots.forEach((s,i) => {
-    if (s.done || s.green.trim() || s.add.trim() || s.des.trim()) predictions[CASES[i].id] = s.prob;
+    // Only a saved market carries a number. Writing one for a half-typed market
+    // made the echo below mark it answered, inflating the count and unlocking
+    // the send button for ten markets nobody had committed to.
+    if (s.done) predictions[CASES[i].id] = s.prob;
   });
   try {
     const enc = await encryptPayload({
@@ -386,11 +415,18 @@ async function pushProgress() {
 async function submitAll(auto = false) {
   if (state.submitted) return;
   state.slots.forEach(s => { if (!s.done) { s.prob = 50; s.done = true; } });  // missing = 50%
-  state.submitted = true;
   await pushProgress();
   try {
     await updateDoc(groupRef(), { submitted: true, auto, submittedAt: serverTimestamp() });
-  } catch (e) { fail('Could not send: ' + e.message); }
+  } catch (e) {
+    // Not sent. Stay on the markets so the group can try again, rather than sit
+    // under a heading that says it worked.
+    fail('Not sent: ' + e.message + ' Touch the button again.');
+    renderHome();
+    return;
+  }
+  state.submitted = true;
+  clearInterval(clockTimer);
   renderSent(); show('sent');
 }
 
@@ -541,10 +577,16 @@ function downloadMd() {
   });
   txt += `${rule}\n30296 Global Sustainability Strategy · Bocconi University\n`;
 
+  // Safari ignores a click on an anchor that is not in the document, and a URL
+  // revoked in the same tick. Both cost nothing to get right.
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([txt], { type:'text/plain;charset=utf-8' }));
+  const href = URL.createObjectURL(new Blob([txt], { type:'text/plain;charset=utf-8' }));
+  a.href = href;
   a.download = `greenmarket-${state.label.replace(/[^\w]+/g,'-').toLowerCase()}.txt`;
-  a.click(); URL.revokeObjectURL(a.href);
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(href); a.remove(); }, 4000);
 }
 
 // -----------------------------------------------------------------------------
@@ -569,6 +611,11 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) flush
 window.addEventListener('pagehide', flush);
 $('back').onclick = () => { flush(); renderHome(); };
 $('cancel').onclick = cancelMarket;
+$('waitBack').onclick = () => {           // a mistyped market code is a dead end otherwise
+  if (waitTimer) { clearInterval(waitTimer); waitTimer = null; }
+  $('waitBack').classList.add('hidden');
+  show('join');
+};
 
 // While a text box has focus the bet bar leaves its sticky position, so the
 // phone keyboard does not push it up over the writing.
@@ -588,6 +635,10 @@ $('prob').oninput = e => { state.slots[state.open].prob = +e.target.value; paint
 // -----------------------------------------------------------------------------
 // boot
 // -----------------------------------------------------------------------------
+// The page ships with every screen hidden, so without this the student stares
+// at an empty black page until the anonymous sign-in lands.
+if (!localStorage.getItem(LS)) show('intro');
+
 onAuthStateChanged(auth, async user => {
   if (!user) return;
   state.uid = user.uid; state.groupId = user.uid;

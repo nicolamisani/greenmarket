@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Greenmarket</title>
-<link rel="stylesheet" href="style.css?v=34">
+<link rel="stylesheet" href="style.css?v=35">
 <style>
   /* ---- screens the networked client adds on top of the shared stylesheet ---- */
   .wrap{max-width:520px;margin:0 auto}
@@ -242,6 +242,7 @@
       <h2 id="waitTitle">You are in</h2>
       <p class="small" id="waitText">Wait. Your instructor starts the game. Keep this page open.</p>
       <div class="dotrow"><i></i><i></i><i></i></div>
+      <button class="ghost hidden" id="waitBack" style="margin-top:14px">Use a different code</button>
       <p class="small" style="margin-top:18px" id="waitWho"></p>
     </div>
   </div>
@@ -296,6 +297,7 @@
         </div>
         <div class="probval" id="probVal">50%</div>
         <button id="lock">Save</button>
+        <span class="small" id="saveState" style="min-width:56px"></span>
       </div>
       <div class="cancelrow">
         <button class="ghost" id="cancel">Leave without saving</button>
@@ -340,6 +342,6 @@
   </div>
 </div>
 
-<script type="module" src="app.js?v=34"></script>
+<script type="module" src="app.js?v=35"></script>
 </body>
 </html>
